@@ -80,7 +80,7 @@ function loadQuestion() {
       card.className = 'option-card';
       
       const img = document.createElement('img');
-      img.src = item.imagePath; // الصورة مرتبطة حصرياً بـ ID هذا الكائن
+      img.src = item.imagePath;
       img.alt = item.word;
       
       img.onerror = () => {
@@ -88,11 +88,10 @@ function loadQuestion() {
       };
 
       card.appendChild(img);
-      card.onclick = () => checkAnswer(item.id);
+      // ✅ تمرير العنصر card هنا
+      card.onclick = () => checkAnswer(item.id, card);
       optionsContainer.appendChild(card);
     });
-
-    playCurrentAudio();
 
   // ==========================================
   // المستوى 2: الحرف والكلمة
@@ -110,7 +109,8 @@ function loadQuestion() {
       const card = document.createElement('div');
       card.className = 'option-card';
       card.innerHTML = `<span class="option-text">${item.word}</span>`;
-      card.onclick = () => checkAnswer(item.id);
+      // ✅ تمرير العنصر card هنا أيضاً
+      card.onclick = () => checkAnswer(item.id, card);
       optionsContainer.appendChild(card);
     });
 
@@ -120,11 +120,9 @@ function loadQuestion() {
   } else if (currentLevel === 3) {
     instruction.textContent = 'اختر الصورة التي تبدأ بهذا الحرف:' + progressText;
     
-    // استخراج الحرف المشكول من الكلمة المستهدفة
     const firstLetterWithHarakat = currentTarget.word ? currentTarget.word.slice(0, 2) : currentTarget.letter;
     targetWord.textContent = `حرف - ${firstLetterWithHarakat}`;
 
-    // فلترة المشتتات لضمان عدم التداخل
     let pool = educationalItems.filter(item => 
       item.id !== currentTarget.id && 
       (!item.word || item.word.slice(0, 2) !== firstLetterWithHarakat)
@@ -155,9 +153,7 @@ function loadQuestion() {
 
       card.appendChild(img);
       
-      // تتبع مسار ملف الصوت الصريح المرتبط بالعنصر عند النقر
       card.onclick = () => {
-        // استخراج اسم الملف الصوتي وحده من المسار للوضوح السريع في الكونسول
         const audioFileName = item.pictureAudioPath ? item.pictureAudioPath.split('/').pop() : 'غير متوفر';
         const letterAudioFileName = item.letterAudioPath ? item.letterAudioPath.split('/').pop() : 'غير متوفر';
 
@@ -165,7 +161,8 @@ function loadQuestion() {
         console.log("🔊 معرف/اسم ملف صوت الحرف:", letterAudioFileName, "| المسار الكامل:", item.letterAudioPath);
         console.log("🏷️ ID العنصر النظيف:", item.id, "| الكلمة:", item.word);
         
-        checkAnswer(item.id);
+        // ✅ تمرير العنصر card هنا أيضاً في المستوى الثالث
+        checkAnswer(item.id, card);
       };
       optionsContainer.appendChild(card);
     });
@@ -173,7 +170,8 @@ function loadQuestion() {
 }
 
 // فحص الإجابة المختارة
-function checkAnswer(selectedId) {
+// فحص الإجابة المختارة (مع استقبال العنصر النقر clickedCard)
+function checkAnswer(selectedId, clickedCard) {
   const feedback = document.getElementById('feedback-msg');
   
   // تعطيل النقر المؤقت لمنع التكرار أثناء التشغيل
@@ -186,84 +184,182 @@ function checkAnswer(selectedId) {
     feedback.textContent = 'إجابة صحيحة! أحسنت 🎉';
     feedback.className = 'feedback-banner success';
 
-    // 🎯 [إصلاح عداد النقاط]: زيادة النقاط وتحديث واجهتها مباشرة عند الإجابة الصحيحة
+    // 🎯 [إصلاح عداد النقاط]
     if (typeof score !== 'undefined') {
-      score += 10; // أو مقدار الزيادة المعتمد لديك لكل إجابة صحيحة
+      score += 10;
     }
     if (typeof updateScoreDisplay === 'function') {
-      updateScoreDisplay(); // الدالة المسؤولة عن تحديث العداد على الشاشة إذا وجدت
+      updateScoreDisplay();
     } else {
-      // تحديث مباشر للعنصر في حال عدم وجود دالة منفصلة
       const scoreElement = document.getElementById('score') || document.getElementById('points');
       if (scoreElement) scoreElement.textContent = score;
     }
 
-    // 🔊 تشغيل صوت النجاح العام فوراً في جميع المستويات (1، 2، و 3)
-    if (typeof successAudio !== 'undefined' && successAudio) {
-      successAudio.currentTime = 0;
-      successAudio.play().catch(() => {});
+    // تلوين البطاقة الصحيحة بالاخضر اختياري (إن رغبت)
+    if (clickedCard) {
+      clickedCard.style.border = '4px solid #4CAF50';
     }
 
-    // المنطق الخاص بالمستوى الثالث أو المستويات التي تعتمد على الصوت الصريح
-    if (currentLevel === 3) {
-      // استخدام مسار الصوت المخصص للصورة/الكلمة من الكائن مباشرة
-      const pictureAudioSrc = currentTarget.pictureAudioPath || currentTarget.letterAudioPath;
-      
-      const audioFileName = pictureAudioSrc ? pictureAudioSrc.split('/').pop() : 'غير متوفر';
-      console.log("🔊 تشغيل صوت الصورة/الفعلي (ملف):", audioFileName, "| المسار:", pictureAudioSrc);
-      console.log("🎯 الـ ID المطابق:", currentTarget.id);
+    // 🔊 تشغيل صوت العنصر الفعلي أولاً
+    const audioSrc = currentTarget.pictureAudioPath || currentTarget.letterAudioPath;
+    const targetAudio = new Audio(audioSrc);
+    targetAudio.play().catch(err => console.log("Target audio error:", err));
 
-      const pictureAudio = new Audio(pictureAudioSrc);
-      pictureAudio.play().catch(err => console.log("Picture audio error:", err));
+    targetAudio.onended = () => {
+      triggerSuccessAndNext();
+    };
 
-      // 2. إعادة تشغيل صوت النجاح الإضافي بعد 2.5 ثانية (إذا رغبت) أو الاكتفاء بالصوت الأول
-      setTimeout(() => {
-        // 3. إطلاق الـ Confetti بعد انتهاء الصوت
-        if (typeof confetti === 'function') {
-          confetti({
-            particleCount: 70,
-            spread: 60,
-            origin: { y: 0.6 }
-          });
-        }
-      }, 2500);
-    } else {
-      // إطلاق الـ Confetti فوراً في المستويين 1 و 2
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 70,
-          spread: 60,
-          origin: { y: 0.6 }
-        });
+    const fallbackTimer = setTimeout(() => {
+      if (targetAudio.paused) {
+        triggerSuccessAndNext();
       }
+    }, 2500);
+
+    function triggerSuccessAndNext() {
+      clearTimeout(fallbackTimer);
+      
+      const successAudioElem = document.getElementById('audio-success') || (typeof successAudio !== 'undefined' ? successAudio : null);
+      if (successAudioElem) {
+        successAudioElem.currentTime = 0;
+        successAudioElem.play().catch(() => {});
+      }
+
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+      }
+
+      questionCount++;
+      setTimeout(() => {
+        transitionToNextQuestion();
+      }, 3500);
     }
+    
+} else {
+    // ❌ إجابة خاطئة
 
-    // الانتقال للسؤال التالي بعد انتهاء المدة الزمنية
-    questionCount++;
-    setTimeout(() => {
-      loadQuestion();
-    }, currentLevel === 3 ? 3500 : 1500); // إعطاء وقت كافي للتشغيل في المستوى الثالث
-
- } else {
-    // إجابة خاطئة
+    console.log("🚨 تم الضغط على صورة خطأ! ID الذي تم النقر عليه:", selectedId, "بينما الهدف الصحيح هو:", currentTarget.id);
     feedback.textContent = 'حاول مرة أخرى! ❌';
     feedback.className = 'feedback-banner error';
 
-    // 🔊 تشغيل ملف الفشل المعرف في HTML عبر الـ ID
+    // 🔴 تلوين إطار البطاقة المضغوطة باللون الأحمر
+    if (clickedCard) {
+      clickedCard.classList.add('wrong-selection');
+
+      // 🔍 [حقن الكونسول]: فحص الألوان والخصائص الفعلية المطبقة على العنصر الآن
+      const computedStyle = window.getComputedStyle(clickedCard);
+      console.log("----------------------------------------");
+      console.log("🎨 لون الخلفية الفعلي (background-color):", computedStyle.backgroundColor);
+      console.log("🎨 لون الإطار الفعلي (border-color):", computedStyle.borderColor);
+      console.log("🎨 عرض الإطار الفعلي (border-width):", computedStyle.borderWidth);
+      console.log("🎨 نمط الإطار (border-style):", computedStyle.borderStyle);
+      console.log("🎨 تأثير الظل (box-shadow):", computedStyle.boxShadow);
+      console.log("----------------------------------------");
+    }
+
+    // 🔊 تشغيل ملف الفشل
     const wrongAudio = document.getElementById('audio-wrong');
     if (wrongAudio) {
       wrongAudio.currentTime = 0;
       wrongAudio.play().catch(err => console.log("Wrong audio error:", err));
     }
 
-    // إعادة تفعيل النقر للسماح للمستخدم بالمحاولة مرة أخرى
+    // إعادة تفعيل النقر وإزالة التأثيرات بعد انتهاء المدة
     setTimeout(() => {
-      cards.forEach(card => card.style.pointerEvents = 'auto');
+      cards.forEach(card => {
+        card.style.pointerEvents = 'auto';
+        card.classList.remove('wrong-selection');
+      });
       feedback.textContent = '';
       feedback.className = 'feedback-banner';
     }, 1200);
   }
 }
+
+// متغير لتتبع أعلى مستوى وصل إليه اللاعب
+let highestUnlockedLevel = 1;
+
+// دالة الانتقال بين المستويات (مع التحقق هل المستوى مفتوح أم لا)
+function switchLevel(level) {
+  if (level > highestUnlockedLevel) {
+    alert("عقداً، يجب إكمال المستوى السابق أولاً لفتح هذا المستوى!");
+    return;
+  }
+
+  currentLevel = level;
+  questionCount = 0; // إعادة صياغة عداد الأسئلة عند تبديل المستوى
+  
+  // تحديث شكل الأزرار النشطة
+  document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`level-btn-${level}`).classList.add('active');
+
+  loadQuestion();
+}
+
+// دالة تحديث حالة الأزرار (فتح وإقفال بناءً على التقدم)
+function updateLevelButtonsUI() {
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById(`level-btn-${i}`);
+    if (!btn) continue;
+
+    if (i <= highestUnlockedLevel) {
+      // فتح المستوى
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      // إزالة علامة القفل إن وجدت من النص
+      btn.textContent = btn.textContent.replace('🔒 ', '');
+    } else {
+      // إقفال المستوى
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      if (!btn.textContent.includes('🔒')) {
+        btn.textContent = '🔒 ' + btn.textContent;
+      }
+    }
+  }
+}
+
+// دالة شاشة إنهاء المستوى والتقدم للمستوى التالي
+function showLevelCompleteScreen() {
+  const optionsContainer = document.getElementById('options-container');
+  const targetWord = document.getElementById('target-word');
+  const instruction = document.getElementById('instruction');
+  const feedback = document.getElementById('feedback-msg');
+
+  targetWord.textContent = "🎉 أحسنت!";
+  instruction.textContent = `أتممت المستوى ${currentLevel} بنجاح!`;
+  optionsContainer.innerHTML = '';
+  feedback.textContent = '';
+
+  // تحديث أعلى مستوى تم الوصول إليه
+  if (currentLevel >= highestUnlockedLevel && currentLevel < 3) {
+    highestUnlockedLevel = currentLevel + 1;
+    updateLevelButtonsUI();
+  }
+
+  // زر الانتقال للمستوى التالي أو إعادة اللعب
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'level-btn active';
+  nextBtn.style.padding = '12px 24px';
+  nextBtn.style.fontSize = '18px';
+  nextBtn.style.marginTop = '20px';
+
+  if (currentLevel < 3) {
+    nextBtn.textContent = `الانتقال إلى المستوى ${currentLevel + 1} 🚀`;
+    nextBtn.onclick = () => switchLevel(currentLevel + 1);
+  } else {
+    nextBtn.textContent = `أتممت جميع المستويات! إعادة اللعب 🏆`;
+    nextBtn.onclick = () => {
+      highestUnlockedLevel = 1;
+      updateLevelButtonsUI();
+      switchLevel(1);
+    };
+  }
+
+  optionsContainer.appendChild(nextBtn);
+}
+
 // دالة مساعدة لتعطيل أو تفعيل النقر على الخيارات أثناء الانتقال
 function disableOptions(disabled) {
   const options = document.querySelectorAll('.option-card');
@@ -311,6 +407,29 @@ function showLevelCompleteScreen() {
       origin: { y: 0.5 }
     });
   }
+}
+
+// دالة الانتقال للسؤال التالي بتأثير قلب الصفحة
+function transitionToNextQuestion() {
+  const container = document.getElementById('game-board') || document.getElementById('options-container').parentElement;
+  
+  // 1. تطبيق تأثير خروج الصفحة الحالية
+  container.classList.add('page-flip-out');
+
+  setTimeout(() => {
+    // 2. تحميل السؤال الجديد في الوظيفة
+    loadQuestion();
+
+    // 3. إزالة كلاس الخروج وإضافة كلاس الدخول للصفحة الجديدة
+    container.classList.remove('page-flip-out');
+    container.classList.add('page-flip-in');
+
+    // إزالة كلاس الدخول بعد انتهاء الحركة ليعود العنصر لحالته الطبيعية
+    setTimeout(() => {
+      container.classList.remove('page-flip-in');
+    }, 600);
+
+  }, 400); // الانتظار حتى ينصف تأثير الخروج
 }
 
 // التبديل بين المستويات وتصفير العداد

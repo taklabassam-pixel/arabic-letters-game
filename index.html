@@ -16,11 +16,11 @@
       <div class="score-badge">النقاط: <span id="score">0</span> ⭐️</div>
     </header>
     
-    <!-- شريط التنقل بين المستويات الثلاثة -->
+    <!-- شريط التنقل بين المستويات الثلاثة (محدث للفتح التدريجي) -->
     <nav class="levels-nav">
-      <button class="level-btn active" onclick="switchLevel(1)">المستوى الأوّل </button>
-      <button class="level-btn" onclick="switchLevel(2)">المستوى الثاني </button>
-      <button class="level-btn" onclick="switchLevel(3)">المستوى الثالث</button>
+      <button id="level-btn-1" class="level-btn active" onclick="switchLevel(1)">المستوى الأوّل</button>
+      <button id="level-btn-2" class="level-btn" onclick="switchLevel(2)" disabled style="opacity: 0.5; cursor: not-allowed;">🔒 المستوى الثاني</button>
+      <button id="level-btn-3" class="level-btn" onclick="switchLevel(3)" disabled style="opacity: 0.5; cursor: not-allowed;">🔒 المستوى الثالث</button>
     </nav>
 
     <!-- منطقة العرض والتفاعل للطفل -->

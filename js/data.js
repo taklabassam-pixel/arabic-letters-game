@@ -250,9 +250,9 @@ const gameData = [
   {
     id: 'qamar',
     letter: 'ق',
-    word: 'قَلَمٌ',
-    imagePath: '../assets/images/qalam.webp',
-    audioPath: '../assets/audio/words/qalam.mp3',
+    word: 'قَمَرٌ',
+    imagePath: '../assets/images/qamar.webp',
+    audioPath: '../assets/audio/words/qamar.mp3',
     letterAudioPath: '../assets/audio/letter_word/qaf_fatha_1.wav',
     pictureAudioPath: '../assets/audio/letter_word/qamar.wav'
   },
