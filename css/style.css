@@ -94,6 +94,68 @@ body {
   }
 }
 
+/* زخرفة البطاقة الحاضنة (#target-card) أثناء عرض جملة النجمة فقط */
+#target-card.star-congrats-active {
+  position: relative;
+  background: linear-gradient(135deg, #fffdf2 0%, #fff3c4 100%);
+  border: 2.5px solid #f5b700;
+  border-radius: 22px;
+  box-shadow:
+    0 8px 22px rgba(245, 183, 0, 0.28),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+  animation: starCardGlow 1.2s ease-in-out infinite alternate;
+}
+
+/* لمسة زخرفية خفيفة في أعلى البطاقة دون حجب النص */
+#target-card.star-congrats-active::before {
+  content: "✦";
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  color: #e09f00;
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+#target-card.star-congrats-active::after {
+  content: "✦";
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  color: #e09f00;
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+/* زخرفة النص داخل (#target-word) مع الحفاظ على مواصفات الكلمة */
+#target-word.star-congrats-text {
+  color: #7c4700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: starTextPop 0.35s ease-out;
+}
+
+@keyframes starCardGlow {
+  0% {
+    box-shadow:
+      0 6px 18px rgba(245, 183, 0, 0.22),
+      inset 0 0 0 3px rgba(255, 255, 255, 0.8);
+  }
+  100% {
+    box-shadow:
+      0 10px 26px rgba(245, 183, 0, 0.4),
+      inset 0 0 0 3px rgba(255, 255, 255, 0.95);
+  }
+}
+
+@keyframes starTextPop {
+  0% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* يطبق على محتوى المستوى أثناء الانقلاب */
 .page-flip-out {
   transform-origin: left center; /* محور الانقلاب */

@@ -13,16 +13,253 @@ let mistakeCount = 0; // عداد الأخطاء داخل اللعبة
 
 // متغيرات تتبع الأسئلة
 let questionCount = 0;
-const questionsPerLevel = 5;
+const questionsPerLevel = 7;
 
 // عناصر الصوت التفاعلية
 const successAudio = document.getElementById('audio-success');
 const wrongAudio = document.getElementById('audio-wrong');
 const wordAudioPlayer = document.getElementById('audio-word-player');
 
+// إعدادات ومسار ملف صوت النجمة
+const STAR_UNLOCK_AUDIO_PATH = '../assets/audio/win_star.wav';
+let starAudioPlayer = null;
+let activeTargetAudio = null;
+let starSequenceToken = 0;
+let deferredTargetWordText = null;
+let pendingStarReward = null;
+window.isPlayingStarSound = false;
+window.isShowingStarCongrats = false;
+
+// إيجاد أي ملف صوتي قيد التشغيل حالياً
+function getCurrentlyPlayingAudio() {
+  if (starAudioPlayer && !starAudioPlayer.paused && !starAudioPlayer.ended) {
+    return starAudioPlayer;
+  }
+
+  if (activeTargetAudio && !activeTargetAudio.paused && !activeTargetAudio.ended) {
+    return activeTargetAudio;
+  }
+
+  if (wordAudioPlayer && !wordAudioPlayer.paused && !wordAudioPlayer.ended) {
+    return wordAudioPlayer;
+  }
+
+  const successAudioElem = document.getElementById('audio-success') || successAudio;
+  if (successAudioElem && !successAudioElem.paused && !successAudioElem.ended) {
+    return successAudioElem;
+  }
+
+  const wrongAudioElem = document.getElementById('audio-wrong') || wrongAudio;
+  if (wrongAudioElem && !wrongAudioElem.paused && !wrongAudioElem.ended) {
+    return wrongAudioElem;
+  }
+
+  const allAudios = Array.from(document.querySelectorAll('audio'));
+  return allAudios.find(el => !el.paused && !el.ended) || null;
+}
+
+// انتظار انتهاء الملف الصوتي الشغال حالياً
+function waitForCurrentAudioToFinish(fallbackMs = 4500) {
+  return new Promise(resolve => {
+    const activeAudio = getCurrentlyPlayingAudio();
+    if (!activeAudio) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      activeAudio.removeEventListener('ended', done);
+      activeAudio.removeEventListener('error', done);
+      resolve();
+    };
+
+    const timer = setTimeout(done, fallbackMs);
+    activeAudio.addEventListener('ended', done, { once: true });
+    activeAudio.addEventListener('error', done, { once: true });
+  });
+}
+
+// تشغيل ملف النجاح وانتظار انتهائه فعلياً قبل تفعيل دالة النجمة
+function playSuccessAudioAndWait(fallbackMs = 3500) {
+  return new Promise(resolve => {
+    const successAudioElem =
+      document.getElementById('audio-success') ||
+      (typeof successAudio !== 'undefined' ? successAudio : null);
+
+    if (!successAudioElem) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      successAudioElem.removeEventListener('ended', done);
+      successAudioElem.removeEventListener('error', done);
+      resolve();
+    };
+
+    const timer = setTimeout(done, fallbackMs);
+    successAudioElem.addEventListener('ended', done, { once: true });
+    successAudioElem.addEventListener('error', done, { once: true });
+
+    try {
+      successAudioElem.currentTime = 0;
+      const playPromise = successAudioElem.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => done());
+      }
+    } catch (_) {
+      done();
+    }
+  });
+}
+
+// إيقاف أي أصوات أخرى قبل تشغيل صوت النجمة لمنع التضارب
+function stopOtherAudioForStarSound() {
+  const otherAudios = [
+    activeTargetAudio,
+    wordAudioPlayer,
+    document.getElementById('audio-success') || successAudio,
+    document.getElementById('audio-wrong') || wrongAudio,
+    ...Array.from(document.querySelectorAll('audio'))
+  ].filter(Boolean);
+
+  otherAudios.forEach(audioEl => {
+    if (audioEl !== starAudioPlayer && !audioEl.paused) {
+      try {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+      } catch (_) {}
+    }
+  });
+}
+
+// تشغيل ملف صوت النجمة وانتظار انتهائه
+function playStarAudioAndWait(fallbackMs = 5000) {
+  return new Promise(resolve => {
+    if (!STAR_UNLOCK_AUDIO_PATH) {
+      resolve();
+      return;
+    }
+
+    stopOtherAudioForStarSound();
+
+    if (!starAudioPlayer) {
+      starAudioPlayer = new Audio();
+      starAudioPlayer.preload = 'auto';
+    }
+
+    starAudioPlayer.pause();
+    starAudioPlayer.currentTime = 0;
+    starAudioPlayer.src = STAR_UNLOCK_AUDIO_PATH;
+    window.isPlayingStarSound = true;
+
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(safetyTimer);
+      window.isPlayingStarSound = false;
+      starAudioPlayer.removeEventListener('ended', finish);
+      starAudioPlayer.removeEventListener('error', finish);
+      resolve();
+    };
+
+    const safetyTimer = setTimeout(finish, fallbackMs);
+    starAudioPlayer.addEventListener('ended', finish, { once: true });
+    starAudioPlayer.addEventListener('error', finish, { once: true });
+
+    starAudioPlayer.play().catch(() => {
+      finish();
+    });
+  });
+}
+
+// إظهار النجمة في مكانها
+function revealStarsBadge(starsCount, previousStars) {
+  const starsBadge = document.getElementById('stars-badge');
+  const starsMedalsElement = document.getElementById('stars-medals');
+  const starsCountElement = document.getElementById('stars-count');
+  if (!starsBadge) return;
+
+  starsBadge.dataset.starsCount = String(starsCount);
+  starsBadge.classList.remove('stars-hidden');
+  starsBadge.classList.add('stars-attention');
+
+  if (starsCountElement) {
+    starsCountElement.textContent = String(starsCount);
+  }
+
+  if (starsMedalsElement) {
+    starsMedalsElement.innerHTML = '';
+    for (let i = 0; i < starsCount; i++) {
+      const medal = document.createElement('span');
+      medal.className = 'star-medal';
+      medal.textContent = '⭐';
+      if (i >= previousStars) {
+        medal.classList.add('star-pulse');
+      }
+      starsMedalsElement.appendChild(medal);
+    }
+  }
+
+  starsBadge.classList.remove('star-pulse');
+  void starsBadge.offsetWidth;
+  starsBadge.classList.add('star-pulse');
+
+  setTimeout(() => {
+    starsBadge.classList.remove('star-pulse');
+  }, 450);
+}
+
+// دالة النجمة:
+// 1. إيقاف/تجاوز عرض الكلمة المفترضة وعرض الجملة بنفس مواصفات الكلمة
+// 2. تشغيل ملف صوت النجمة وإظهار النجمة في مكانها
+// 3. انتظار انتهاء ملف صوت النجمة ثم إعادة الحاوية إلى حالتها الطبيعية
+async function runNewStarSequence(starsCount, previousStars) {
+  const token = ++starSequenceToken;
+  deferredTargetWordText = null;
+  window.isShowingStarCongrats = true;
+
+  await waitForCurrentAudioToFinish();
+  if (token !== starSequenceToken) return;
+
+  const wordElement = document.getElementById('target-word');
+  const previousWordText = wordElement ? wordElement.textContent : '';
+  const congratsText = 'مبروك حصلت على نجمة';
+
+  if (wordElement) {
+    wordElement.dataset.preStarWord = previousWordText;
+    wordElement.textContent = congratsText;
+  }
+
+  revealStarsBadge(starsCount, previousStars);
+  await playStarAudioAndWait();
+  if (token !== starSequenceToken) return;
+
+  window.isShowingStarCongrats = false;
+  if (wordElement) {
+    if (deferredTargetWordText !== null) {
+      wordElement.textContent = deferredTargetWordText;
+    } else if (wordElement.textContent === congratsText) {
+      wordElement.textContent = wordElement.dataset.preStarWord || '---';
+    }
+    delete wordElement.dataset.preStarWord;
+  }
+  deferredTargetWordText = null;
+}
+
 // تشغيل الصوت الذاتي للكلمة المستهدفة أو الحرف في المستوى الثالث
 function playCurrentAudio() {
   if (!currentTarget) return;
+  if (window.isPlayingStarSound) return;
 
   let audioPath = currentTarget.audioPath; // المسار الافتراضي (للمستويات 1 و 2)
 
@@ -31,13 +268,76 @@ function playCurrentAudio() {
     audioPath = currentTarget.letterAudioPath;
   }
 
-  if (audioPath) {
+  if (audioPath && wordAudioPlayer) {
     wordAudioPlayer.src = audioPath;
     wordAudioPlayer.currentTime = 0;
     wordAudioPlayer.play().catch(err => console.log("Audio file pending:", audioPath));
   }
 }
 
+// مدة إضافية بالمللي ثانية لإبقاء جملة التهنئة ظاهرة (مثلاً 1500 = 1.5 ثانية)
+const STAR_CONGRATS_EXTRA_HOLD_MS = 2500;
+
+function waitMs(ms) {
+  return new Promise(resolve => {
+    const safeMs = Number.isFinite(ms) && ms > 0 ? ms : 0;
+    if (safeMs <= 0) {
+      resolve();
+      return;
+    }
+    setTimeout(resolve, safeMs);
+  });
+}
+
+async function runNewStarSequence(starsCount, previousStars) {
+  const token = ++starSequenceToken;
+  deferredTargetWordText = null;
+  window.isShowingStarCongrats = true;
+
+  await waitForCurrentAudioToFinish();
+  if (token !== starSequenceToken) return;
+
+  const cardElement = document.getElementById('target-card');
+  const wordElement = document.getElementById('target-word');
+  const previousWordText = wordElement ? wordElement.textContent : '';
+  const congratsText = 'مبروك حصلت على نجمة';
+
+  if (cardElement) {
+    cardElement.classList.add('star-congrats-active');
+  }
+
+  if (wordElement) {
+    wordElement.dataset.preStarWord = previousWordText;
+    wordElement.textContent = congratsText;
+    wordElement.classList.add('star-congrats-text');
+  }
+
+  revealStarsBadge(starsCount, previousStars);
+  await playStarAudioAndWait();
+  if (token !== starSequenceToken) return;
+
+  if (typeof STAR_CONGRATS_EXTRA_HOLD_MS !== 'undefined') {
+    await waitMs(STAR_CONGRATS_EXTRA_HOLD_MS);
+    if (token !== starSequenceToken) return;
+  }
+
+  window.isShowingStarCongrats = false;
+
+  if (cardElement) {
+    cardElement.classList.remove('star-congrats-active');
+  }
+
+  if (wordElement) {
+    wordElement.classList.remove('star-congrats-text');
+    if (deferredTargetWordText !== null) {
+      wordElement.textContent = deferredTargetWordText;
+    } else if (wordElement.textContent === congratsText) {
+      wordElement.textContent = wordElement.dataset.preStarWord || '---';
+    }
+    delete wordElement.dataset.preStarWord;
+  }
+  deferredTargetWordText = null;
+}
 // تحميل سؤال جديد (الكلمة المستهدفة + 3 خيارات صور/كلمات مطابقة بالكامل)
 function loadQuestion() {
   const feedback = document.getElementById('feedback-msg');
@@ -69,13 +369,14 @@ function loadQuestion() {
   optionsContainer.innerHTML = '';
 
   const progressText = ` (السؤال رقم ${questionCount + 1} )`;
+  let nextTargetText = '---';
 
   // ==========================================
   // المستوى 1: الكلمة والصورة
   // ==========================================
   if (currentLevel === 1) {
     instruction.textContent = ' إختر الصورة المطابقة للكلمة -' + progressText;
-    targetWord.textContent = currentTarget.word;
+    nextTargetText = currentTarget.word;
 
     let pool = educationalItems.filter(item => item.id !== currentTarget.id);
     pool.sort(() => Math.random() - 0.5);
@@ -105,7 +406,7 @@ function loadQuestion() {
   // ==========================================
   } else if (currentLevel === 2) {
     instruction.textContent = 'اختر الكلمة التي تبدأ بهذا الحرف:' + progressText;
-    targetWord.textContent = `حرف (${currentTarget.letter})`;
+    nextTargetText = `حرف (${currentTarget.letter})`;
 
     let pool = educationalItems.filter(item => item.id !== currentTarget.id);
     pool.sort(() => Math.random() - 0.5);
@@ -128,7 +429,7 @@ function loadQuestion() {
     instruction.textContent = 'اختر الصورة التي تبدأ بهذا الحرف:' + progressText;
     
     const firstLetterWithHarakat = currentTarget.word ? currentTarget.word.slice(0, 2) : currentTarget.letter;
-    targetWord.textContent = `حرف - ${firstLetterWithHarakat}`;
+    nextTargetText = `حرف - ${firstLetterWithHarakat}`;
 
     let pool = educationalItems.filter(item => 
       item.id !== currentTarget.id && 
@@ -174,6 +475,15 @@ function loadQuestion() {
       optionsContainer.appendChild(card);
     });
   }
+
+  // إذا كانت جملة التهنئة معروضة حالياً، نُؤجّل كتابة النص الجديد حتى ينتهي صوت النجمة
+  if (targetWord) {
+    if (window.isShowingStarCongrats) {
+      deferredTargetWordText = nextTargetText;
+    } else {
+      targetWord.textContent = nextTargetText;
+    }
+  }
 }
 
 // ==========================================
@@ -204,6 +514,21 @@ function checkAnswer(selectedId, clickedCard) {
     if (typeof score !== 'undefined') {
       score += 10;
     }
+
+    // التحقق من عدد النقاط: إذا كان أكبر أو يساوي 30 وتم استحقاق نجمة جديدة، ننتظر انتهاء ملف النجاح ثم نفعّل دالة النجمة
+    const numericScore = Number(typeof score === 'undefined' ? 0 : score);
+    const safeScore = Number.isFinite(numericScore) && numericScore > 0 ? numericScore : 0;
+    const starsBadge = document.getElementById('stars-badge');
+    const starsCountElement = document.getElementById('stars-count');
+    const previousStars = Number(starsBadge?.dataset.starsCount || starsCountElement?.textContent || 0);
+    const nextStarsCount = Math.floor(safeScore / 30);
+
+    if (safeScore >= 30 && nextStarsCount > previousStars) {
+      pendingStarReward = { starsCount: nextStarsCount, previousStars };
+    } else {
+      pendingStarReward = null;
+    }
+
     if (typeof updateScoreDisplay === 'function') {
       updateScoreDisplay();
     } else {
@@ -224,41 +549,56 @@ function checkAnswer(selectedId, clickedCard) {
     // 🔊 تشغيل صوت العنصر الفعلي أولاً
     const audioSrc = currentTarget.pictureAudioPath || currentTarget.letterAudioPath;
     const targetAudio = new Audio(audioSrc);
-    targetAudio.play().catch(err => console.log("Target audio error:", err));
+    activeTargetAudio = targetAudio;
+    targetAudio.play().catch(err => {
+      console.log("Target audio error:", err);
+      if (activeTargetAudio === targetAudio) activeTargetAudio = null;
+    });
 
     targetAudio.onended = () => {
+      if (activeTargetAudio === targetAudio) activeTargetAudio = null;
       triggerSuccessAndNext();
     };
 
     const fallbackTimer = setTimeout(() => {
       if (targetAudio.paused) {
+        if (activeTargetAudio === targetAudio) activeTargetAudio = null;
         triggerSuccessAndNext();
       }
     }, 2500);
 
-    function triggerSuccessAndNext() {
+    async function triggerSuccessAndNext() {
       clearTimeout(fallbackTimer);
-      
-      const successAudioElem = document.getElementById('audio-success') || (typeof successAudio !== 'undefined' ? successAudio : null);
-      if (successAudioElem) {
-        successAudioElem.currentTime = 0;
-        successAudioElem.play().catch(() => {});
-      }
 
       if (typeof confetti === 'function') {
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
 
+      const starRewardToRun = pendingStarReward;
+      pendingStarReward = null;
+
+      if (starRewardToRun) {
+        // انتظار ملف النجاح حتى ينتهي، ثم تفعيل دالة النجمة
+        await playSuccessAudioAndWait();
+        await runNewStarSequence(starRewardToRun.starsCount, starRewardToRun.previousStars);
+      } else if (!window.isPlayingStarSound) {
+        const successAudioElem = document.getElementById('audio-success') || (typeof successAudio !== 'undefined' ? successAudio : null);
+        if (successAudioElem) {
+          successAudioElem.currentTime = 0;
+          successAudioElem.play().catch(() => {});
+        }
+      }
+
       questionCount++;
       
       setTimeout(() => {
-        // التحقق من إتمام 5 أسئلة لإنهاء المستوى الحالي بنجاح
-        if (questionCount >= 5) {
+        // التحقق من إتمام 7 أسئلة لإنهاء المستوى الحالي بنجاح
+        if (questionCount >= 7) {
           showLevelCompleteScreen();
         } else {
           transitionToNextQuestion();
         }
-      }, 3500);
+      }, 1500);
     }
     
   } else {
@@ -281,11 +621,13 @@ function checkAnswer(selectedId, clickedCard) {
       console.log("----------------------------------------");
     }
 
-    // 🔊 تشغيل ملف الفشل
-    const wrongAudio = document.getElementById('audio-wrong');
-    if (wrongAudio) {
-      wrongAudio.currentTime = 0;
-      wrongAudio.play().catch(err => console.log("Wrong audio error:", err));
+    // 🔊 تشغيل ملف الفشل (إذا لم يكن صوت النجمة قيد التشغيل)
+    if (!window.isPlayingStarSound) {
+      const wrongAudio = document.getElementById('audio-wrong');
+      if (wrongAudio) {
+        wrongAudio.currentTime = 0;
+        wrongAudio.play().catch(err => console.log("Wrong audio error:", err));
+      }
     }
 
     // 🛑 التحقق من إغلاق نافذة اللعبة والعودة للواجهة الأساسية عند الوصول لخطأين
@@ -320,7 +662,7 @@ function updateScoreDisplay() {
   const starsMedalsElement = document.getElementById('stars-medals');
   const starsCountElement = document.getElementById('stars-count');
 
-  // تحويل آمن للنقاط إلى رقم (مع تنبيه إذا كان score عنصر DOM بالخطأ)
+  // تحويل آمن للنقاط إلى رقم
   const rawScore = typeof score === 'undefined' ? 0 : score;
   const numericScore = Number(rawScore);
   const safeScore = Number.isFinite(numericScore) && numericScore > 0 ? numericScore : 0;
@@ -342,6 +684,7 @@ function updateScoreDisplay() {
   // 2. إخفاء النجوم/الأوسمة طالما النقاط أقل من 30، وإظهارها بحركة دورية عند 30 فأكثر
   if (starsBadge) {
     if (safeScore < 30 || starsCount <= 0) {
+      starsBadge.dataset.starsCount = '0';
       starsBadge.classList.add('stars-hidden');
       starsBadge.classList.remove('stars-attention', 'star-pulse');
       if (starsCountElement) starsCountElement.textContent = '0';
@@ -349,7 +692,17 @@ function updateScoreDisplay() {
       return;
     }
 
-    const previousStars = Number(starsCountElement?.textContent) || 0;
+    const previousStars = Number(starsBadge.dataset.starsCount || starsCountElement?.textContent || 0);
+
+    // إذا كان هناك استحقاق نجمة جديدة قيد الانتظار لانتهاء ملف النجاح، نؤجل تفعيلها حتى ينتهي ملف النجاح
+    if (starsCount > previousStars) {
+      starsBadge.dataset.starsCount = String(starsCount);
+      if (!pendingStarReward) {
+        runNewStarSequence(starsCount, previousStars);
+      }
+      return;
+    }
+
     starsBadge.classList.remove('stars-hidden');
     starsBadge.classList.add('stars-attention');
 
@@ -363,21 +716,8 @@ function updateScoreDisplay() {
         const medal = document.createElement('span');
         medal.className = 'star-medal';
         medal.textContent = '⭐';
-        if (i >= previousStars) {
-          medal.classList.add('star-pulse');
-        }
         starsMedalsElement.appendChild(medal);
       }
-    }
-
-    if (starsCount > previousStars) {
-      starsBadge.classList.remove('star-pulse');
-      void starsBadge.offsetWidth;
-      starsBadge.classList.add('star-pulse');
-
-      setTimeout(() => {
-        starsBadge.classList.remove('star-pulse');
-      }, 450);
     }
   }
 }
@@ -561,7 +901,7 @@ function showLevelCompleteScreen() {
     if (currentLevel < 3) {
       feedback.textContent = ''; // تم حذف عبارة انتقل للمستوى التالي
     } else {
-      feedback.textContent = 'لقد أتممت كافة المستويات بنجاح تام! 🏆';
+      feedback.textContent = 'لقد أتممت كل المستويات بنجاح ! 🏆';
     }
     feedback.className = 'feedback-banner success';
   }
@@ -591,7 +931,7 @@ function showLevelCompleteScreen() {
   if (currentLevel < 3) {
   const nextLevel = currentLevel + 1;
   const levelLabel = levelNames[nextLevel] || nextLevel;
-  nextBtn.textContent = `الانتقال إلى المستوى ${levelLabel} 🚀`;
+  nextBtn.textContent = `الانتقال إلى المستوى ${levelLabel} `;
   nextBtn.onclick = () => switchLevel(nextLevel);
 } else {
   nextBtn.textContent = `🏆 إعادة اللعب من البداية`;
@@ -632,9 +972,12 @@ function transitionToNextQuestion() {
   }, 400);
 }
 
-// تشغيل أول سؤال عند تحميل الصفحة وتحديث الأزرار
+// تشغيل أول سؤال عند تحميل الصفحة وتحديث الأزرار ومزامنة عرض النقاط والنجوم
 window.onload = () => {
   updateLevelButtonsUI();
+  if (typeof updateScoreDisplay === 'function') {
+    updateScoreDisplay();
+  }
   if (typeof loadQuestion === 'function') {
     loadQuestion();
   }

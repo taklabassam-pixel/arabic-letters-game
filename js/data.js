@@ -27,6 +27,14 @@ const gameData = [
     letterAudioPath: '../assets/audio/letter_word/jeem_fatha_1.wav',
     pictureAudioPath: '../assets/audio/letter_word/jamal.wav'
   },
+  { id: 'wurud',
+    letter: 'و',
+    word: 'وُرُودٌ',
+    imagePath: '../assets/images/wurud.webp',
+    audioPath: '../assets/audio/words/wurud.mp3',
+    letterAudioPath: '../assets/audio/letter_word/waw_damma_1.wav',
+    pictureAudioPath: '../assets/audio/letter_word/wurud.wav'
+  },
   {
     id: 'hisan',
     letter: 'ح',
