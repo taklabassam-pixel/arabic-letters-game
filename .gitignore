@@ -1,0 +1,14 @@
+# ملفات نظام التشغيل والبيئة
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ملفات محرر الأكواد والاختبارات المحلية
+.vscode/
+.idea/
+*.log
+
+# مجلدات الحزم المؤقتة إن وُجدت
+node_modules/
+dist/
+build/
