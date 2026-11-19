@@ -14,6 +14,9 @@ body {
 }
 
 .game-container {
+  position: relative;
+  perspective: 1400px; /* عمق المنظور ثلاثي الأبعاد */
+  overflow: hidden;
   background: #ffffff;
   width: 100%;
   max-width: 680px;
@@ -24,26 +27,172 @@ body {
   text-align: center;
 }
 
+.stars-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: #5d4037;
+  padding: 6px 14px;
+  font-family: 'Amiri', serif;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.stars-badge:hover {
+  animation-play-state: paused;
+  transform: translateY(-2px);
+}
+
+.stars-badge:active {
+  transform: scale(0.96);
+}
+
+.star-pulse {
+  animation: starPop 0.35s ease;
+}
+
+@keyframes starPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+.stars-hidden {
+  display: none !important;
+}
+
+/* حركة لفت الانتباه تتكرر كل 2.5 ثانية */
+.stars-attention {
+  animation: starsAttentionLoop 2.5s ease-in-out infinite;
+}
+
+@keyframes starsAttentionLoop {
+  0%, 76% {
+    transform: scale(1) rotate(0deg);
+  }
+  81% {
+    transform: scale(1.16) rotate(-8deg);
+  }
+  86% {
+    transform: scale(1.16) rotate(8deg);
+  }
+  91% {
+    transform: scale(1.12) rotate(-4deg);
+  }
+  96%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* يطبق على محتوى المستوى أثناء الانقلاب */
+.page-flip-out {
+  transform-origin: left center; /* محور الانقلاب */
+  backface-visibility: hidden;
+  animation: pageFlipOut 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page-flip-in {
+  transform-origin: right center;
+  backface-visibility: hidden;
+  animation: pageFlipIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes pageFlipOut {
+  0% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: rotateY(-85deg) scale(0.96);
+    box-shadow: -15px 10px 25px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@keyframes pageFlipIn {
+  0% {
+    opacity: 0;
+    transform: rotateY(85deg) scale(0.96);
+    box-shadow: 15px 10px 25px rgba(0, 0, 0, 0.15);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
 .game-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  justify-content: center; /* توسيط محتويات العنوان أفقياً */
+  align-items: center;     /* محاذاة العناصر عمودياً في المنتصف */
+  gap: 15px;               /* مسافة بين الصورة والعنوان النصي */
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+}
+
+.header-logo {
+  width: 55px;             /* عرض مناسب لأيقونة العنوان */
+  height: 55px;            /* ارتفاع متناسق */
+  border-radius: 50%;      /* جعل الصورة دائرية (أو قم بإزالتها لتبقى مربعة) */
+  object-fit: cover;
+  border: 2px solid #4CAF50; /* إطار جمالي متناسق مع ألوان اللعبة */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .game-header h2 {
-  margin: 0;
+  margin: 2;
   color: #2e7d32;
   font-size: 22px;
+ }
+
+@keyframes badgeFlip {
+  0% {
+    transform: translateX(-50%) perspective(400px) rotateX(0deg);
+  }
+  50% {
+    transform: translateX(-50%) perspective(400px) rotateX(180deg);
+  }
+  100% {
+    transform: translateX(-50%) perspective(400px) rotateX(360deg);
+  }
 }
 
 .score-badge {
+  position: absolute;
+  bottom: 1.5%; /* مسافة نسبية من أسفل .game-container */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   background: #fff3e0;
-  color: #e65100;
+  color: #561f01;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: bold;
-  border: 1px solid #ffe0b2;
+  font-size: 24px;
+  font-family: Amiri;
+  border: 3px solid #33691e;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease, bottom 0.25s ease;
+}
+
+/* الكلاس المسؤول عن تشغيل الحركة مؤقتاً عند الإجابة الصحيحة */
+.score-badge.animate-spin {
+  animation: badgeFlip 2.8s ease-in-out; 
+  /* يمكنك التحكم بالسرعة عبر تغيير 0.8s (كلما قل الرقم زادت السرعة) */
 }
 
 .levels-nav {
@@ -179,6 +328,7 @@ body {
   margin-top: 16px;
   font-size: 17px;
   font-weight: bold;
+  text-align: left;
 }
 
 .feedback-banner.success { color: #2e7d32; }

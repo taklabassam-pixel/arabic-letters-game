@@ -4,7 +4,7 @@ const gameData = [
     id: 'asad',
     letter: 'أ',
     word: 'أَسَدٌ',
-    imagePath: '../assets/images/asad.webp',
+    imagePath: '../../assets/images/asad.webp',
     audioPath: '../assets/audio/words/asad.mp3',
     letterAudioPath: '../assets/audio/letter_word/alif_fatha_1.wav',
     pictureAudioPath: '../assets/audio/letter_word/asad.wav'
@@ -269,7 +269,7 @@ const gameData = [
     id: 'miqass',
     letter: 'م',
     word: 'مِقَصٌّ',
-    imagePath: '../assets/images/miftah.webp',
+    imagePath: '../assets/images/miqass.webp',
     audioPath: '../assets/audio/words/miqass.mp3',
     letterAudioPath: '../assets/audio/letter_word/meem_kasra_1.wav',
     pictureAudioPath: '../assets/audio/letter_word/miqass.wav'

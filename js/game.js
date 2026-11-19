@@ -4,6 +4,13 @@ let currentLevel = 1;
 let score = 0;
 let currentTarget = null;
 
+// متغيرات تتبع حالة اللعبة والتحدي
+let correctStreak = 0; // عداد البطاقات المنجزة بشكل صحيح متتالي
+let wrongAttempts = 0; // عداد الأخطاء المرتكبة
+let isGameWindowOpen = false; // حالة نافذة اللعبة (مفتوحة/مغلقة)
+
+let mistakeCount = 0; // عداد الأخطاء داخل اللعبة
+
 // متغيرات تتبع الأسئلة
 let questionCount = 0;
 const questionsPerLevel = 5;
@@ -169,8 +176,14 @@ function loadQuestion() {
   }
 }
 
+// ==========================================
+// 🔍 كود المراقبة والتتبع (Console Debugging)
+// ==========================================
+
+// المتغيرات الأساسية للمستويات والتقدم
+let highestUnlockedLevel = 1; // 🔒 يبدأ المستوى 1 فقط متاحاً، والمستويان 2 و3 مقفلان
+
 // فحص الإجابة المختارة
-// فحص الإجابة المختارة (مع استقبال العنصر النقر clickedCard)
 function checkAnswer(selectedId, clickedCard) {
   const feedback = document.getElementById('feedback-msg');
   
@@ -180,7 +193,10 @@ function checkAnswer(selectedId, clickedCard) {
 
   // التحقق هل الإجابة صحيحة أم خاطئة بناءً على المطابقة التامة للـ ID
   if (selectedId === currentTarget.id) {
-    // إجابة صحيحة
+    // 🌟 إجابة صحيحة
+    correctStreak++;
+    wrongAttempts = 0; // إعادة تعيين عداد الأخطاء عند الإجابة الصحيحة
+    
     feedback.textContent = 'إجابة صحيحة! أحسنت 🎉';
     feedback.className = 'feedback-banner success';
 
@@ -195,9 +211,14 @@ function checkAnswer(selectedId, clickedCard) {
       if (scoreElement) scoreElement.textContent = score;
     }
 
-    // تلوين البطاقة الصحيحة بالاخضر اختياري (إن رغبت)
+    // تلوين البطاقة الصحيحة بالأخضر
     if (clickedCard) {
       clickedCard.style.border = '4px solid #4CAF50';
+    }
+
+    // 🔓 التحقق من فتح نافذة اللعبة تلقائياً عند إنجاز 3 بطاقات صحيحة
+    if (correctStreak >= 3 && !isGameWindowOpen) {
+      openGameActiveWindow();
     }
 
     // 🔊 تشغيل صوت العنصر الفعلي أولاً
@@ -229,13 +250,21 @@ function checkAnswer(selectedId, clickedCard) {
       }
 
       questionCount++;
+      
       setTimeout(() => {
-        transitionToNextQuestion();
+        // التحقق من إتمام 5 أسئلة لإنهاء المستوى الحالي بنجاح
+        if (questionCount >= 5) {
+          showLevelCompleteScreen();
+        } else {
+          transitionToNextQuestion();
+        }
       }, 3500);
     }
     
-} else {
+  } else {
     // ❌ إجابة خاطئة
+    wrongAttempts++;
+    correctStreak = 0; // تصفير عداد الإجابات الصحيحة المتتالية عند الخطأ
 
     console.log("🚨 تم الضغط على صورة خطأ! ID الذي تم النقر عليه:", selectedId, "بينما الهدف الصحيح هو:", currentTarget.id);
     feedback.textContent = 'حاول مرة أخرى! ❌';
@@ -245,14 +274,10 @@ function checkAnswer(selectedId, clickedCard) {
     if (clickedCard) {
       clickedCard.classList.add('wrong-selection');
 
-      // 🔍 [حقن الكونسول]: فحص الألوان والخصائص الفعلية المطبقة على العنصر الآن
       const computedStyle = window.getComputedStyle(clickedCard);
       console.log("----------------------------------------");
       console.log("🎨 لون الخلفية الفعلي (background-color):", computedStyle.backgroundColor);
       console.log("🎨 لون الإطار الفعلي (border-color):", computedStyle.borderColor);
-      console.log("🎨 عرض الإطار الفعلي (border-width):", computedStyle.borderWidth);
-      console.log("🎨 نمط الإطار (border-style):", computedStyle.borderStyle);
-      console.log("🎨 تأثير الظل (box-shadow):", computedStyle.boxShadow);
       console.log("----------------------------------------");
     }
 
@@ -263,7 +288,15 @@ function checkAnswer(selectedId, clickedCard) {
       wrongAudio.play().catch(err => console.log("Wrong audio error:", err));
     }
 
-    // إعادة تفعيل النقر وإزالة التأثيرات بعد انتهاء المدة
+    // 🛑 التحقق من إغلاق نافذة اللعبة والعودة للواجهة الأساسية عند الوصول لخطأين
+    if (wrongAttempts >= 2) {
+      console.log("❌ تم ارتكاب خطأين! إغلاق نافذة اللعبة والعودة للواجهة الرئيسية.");
+      setTimeout(() => {
+        closeGameWindowAndReturnHome();
+      }, 1000);
+      return;
+    }
+
     setTimeout(() => {
       cards.forEach(card => {
         card.style.pointerEvents = 'auto';
@@ -275,174 +308,334 @@ function checkAnswer(selectedId, clickedCard) {
   }
 }
 
-// متغير لتتبع أعلى مستوى وصل إليه اللاعب
-let highestUnlockedLevel = 1;
+// دالة تحديث عرض النقاط والنجوم منفصلين (⭐ نجمة لكل 30 نقطة)
+// دالة تحديث عرض النقاط والنجوم (تظهر فقط عند الوصول لـ 30 نقطة فأكثر)
+function updateScoreDisplay() {
+  const scoreElement =
+    document.querySelector('.score-badge') ||
+    document.getElementById('score') ||
+    document.getElementById('points');
 
-// دالة الانتقال بين المستويات (مع التحقق هل المستوى مفتوح أم لا)
-function switchLevel(level) {
-  if (level > highestUnlockedLevel) {
-    alert("عقداً، يجب إكمال المستوى السابق أولاً لفتح هذا المستوى!");
-    return;
+  const starsBadge = document.getElementById('stars-badge');
+  const starsMedalsElement = document.getElementById('stars-medals');
+  const starsCountElement = document.getElementById('stars-count');
+
+  // تحويل آمن للنقاط إلى رقم (مع تنبيه إذا كان score عنصر DOM بالخطأ)
+  const rawScore = typeof score === 'undefined' ? 0 : score;
+  const numericScore = Number(rawScore);
+  const safeScore = Number.isFinite(numericScore) && numericScore > 0 ? numericScore : 0;
+  const starsCount = Math.floor(safeScore / 30);
+
+  // 1. تحديث عداد النقاط وحده
+  if (scoreElement) {
+    scoreElement.textContent = `النقاط: ${safeScore}`;
+
+    scoreElement.classList.remove('animate-spin');
+    void scoreElement.offsetWidth;
+    scoreElement.classList.add('animate-spin');
+
+    setTimeout(() => {
+      scoreElement.classList.remove('animate-spin');
+    }, 800);
   }
 
-  currentLevel = level;
-  questionCount = 0; // إعادة صياغة عداد الأسئلة عند تبديل المستوى
-  
-  // تحديث شكل الأزرار النشطة
-  document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`level-btn-${level}`).classList.add('active');
+  // 2. إخفاء النجوم/الأوسمة طالما النقاط أقل من 30، وإظهارها بحركة دورية عند 30 فأكثر
+  if (starsBadge) {
+    if (safeScore < 30 || starsCount <= 0) {
+      starsBadge.classList.add('stars-hidden');
+      starsBadge.classList.remove('stars-attention', 'star-pulse');
+      if (starsCountElement) starsCountElement.textContent = '0';
+      if (starsMedalsElement) starsMedalsElement.innerHTML = '';
+      return;
+    }
 
-  loadQuestion();
-}
+    const previousStars = Number(starsCountElement?.textContent) || 0;
+    starsBadge.classList.remove('stars-hidden');
+    starsBadge.classList.add('stars-attention');
 
-// دالة تحديث حالة الأزرار (فتح وإقفال بناءً على التقدم)
-function updateLevelButtonsUI() {
-  for (let i = 1; i <= 3; i++) {
-    const btn = document.getElementById(`level-btn-${i}`);
-    if (!btn) continue;
+    if (starsCountElement) {
+      starsCountElement.textContent = String(starsCount);
+    }
 
-    if (i <= highestUnlockedLevel) {
-      // فتح المستوى
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-      // إزالة علامة القفل إن وجدت من النص
-      btn.textContent = btn.textContent.replace('🔒 ', '');
-    } else {
-      // إقفال المستوى
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      if (!btn.textContent.includes('🔒')) {
-        btn.textContent = '🔒 ' + btn.textContent;
+    if (starsMedalsElement) {
+      starsMedalsElement.innerHTML = '';
+      for (let i = 0; i < starsCount; i++) {
+        const medal = document.createElement('span');
+        medal.className = 'star-medal';
+        medal.textContent = '⭐';
+        if (i >= previousStars) {
+          medal.classList.add('star-pulse');
+        }
+        starsMedalsElement.appendChild(medal);
       }
+    }
+
+    if (starsCount > previousStars) {
+      starsBadge.classList.remove('star-pulse');
+      void starsBadge.offsetWidth;
+      starsBadge.classList.add('star-pulse');
+
+      setTimeout(() => {
+        starsBadge.classList.remove('star-pulse');
+      }, 450);
     }
   }
 }
 
-// دالة شاشة إنهاء المستوى والتقدم للمستوى التالي
+// دالة فتح نافذة اللعبة تلقائياً
+function openGameActiveWindow() {
+  isGameWindowOpen = true;
+  const gameContainer = document.querySelector('.game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'block';
+    gameContainer.classList.add('active-game-window');
+  }
+  console.log("🔓 تم فتح نافذة اللعبة تلقائياً لتجاوز 3 بطاقات صحيحة بنجاح!");
+}
+
+// دالة إغلاق النافذة والعودة للواجهة الأساسية عند بلوغ خطأين
+function closeGameWindowAndReturnHome() {
+  isGameWindowOpen = false;
+  correctStreak = 0;
+  wrongAttempts = 0;
+
+  const gameContainer = document.querySelector('.game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'none';
+  }
+
+  alert("عذراً، لقد أخطأت مرتين! سيتم إغلاق نافذة اللعبة والعودة للواجهة الأساسية.");
+  window.location.href = '../index.html'; 
+}
+
+// دالة الانتقال بين المستويات مع تتبع تفصيلي في الكونسول
+let isSwitchingLevel = false;
+
+function switchLevel(level) {
+  console.log(
+    `%c 🚀 [محاولة انتقال]: طلب الانتقال إلى المستوى (${level}) | المستوى الأعلى المتاح حالياً: (${highestUnlockedLevel})`,
+    'color: #2196F3; font-weight: bold; font-size: 13px;'
+  );
+
+  if (level > highestUnlockedLevel) {
+    console.warn(
+      `%c ⛔ [رفض الانتقال]: المستوى ${level} مقفل ولا يمكن فتحه حالياً!`,
+      'color: #F44336; font-weight: bold;'
+    );
+    alert('عذراً، يجب إكمال المستوى السابق أولاً لفتح هذا المستوى!');
+    return;
+  }
+
+  // منع تداخل النقرات السريعة أثناء انقلاب الصفحة
+  if (isSwitchingLevel) return;
+  isSwitchingLevel = true;
+
+  // استهدف حاوية محتوى المستوى إن وجدت، وإلا عناصر .game-container باستثناء عداد النقاط
+  const container = document.querySelector('.game-container');
+  const flipTarget = document.getElementById('level-content') || container;
+
+  const applyLevelData = () => {
+    currentLevel = level;
+    questionCount = 0;
+
+    console.log(
+      `%c ✅ [نجاح الانتقال]: تم تعيين currentLevel بنجاح إلى: (${currentLevel})`,
+      'color: #4CAF50; font-weight: bold;'
+    );
+
+    document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`level-btn-${level}`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+      console.log(
+        `%c 📌 [تحديث الزر النشط]: تم تفعيل الكلاس 'active' للزر #level-btn-${level}`,
+        'color: #FF9800;'
+      );
+    }
+
+    updateLevelButtonsUI();
+
+    if (typeof loadQuestion === 'function') {
+      console.log(
+        `%c 🔄 [تحميل الأسئلة]: استدعاء دالة loadQuestion() للمستوى ${currentLevel}`,
+        'color: #9C27B0;'
+      );
+      loadQuestion();
+    } else {
+      console.warn('⚠️ تنبيه: دالة loadQuestion غير معرفة أو غير موجودة.');
+    }
+  };
+
+  if (!flipTarget) {
+    applyLevelData();
+    isSwitchingLevel = false;
+    return;
+  }
+
+  flipTarget.classList.remove('page-flip-in');
+  flipTarget.classList.add('page-flip-out');
+
+  setTimeout(() => {
+    applyLevelData();
+
+    flipTarget.classList.remove('page-flip-out');
+    flipTarget.classList.add('page-flip-in');
+
+    setTimeout(() => {
+      flipTarget.classList.remove('page-flip-in');
+      isSwitchingLevel = false;
+    }, 450);
+  }, 420);
+}
+
+// دالة تحديث حالة الأزرار مع تتبع حالة كل زر في الكونسول
+function updateLevelButtonsUI() {
+  console.group("🎨 [تحديث واجهة الأزرار - updateLevelButtonsUI]");
+  
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById(`level-btn-${i}`);
+    if (!btn) {
+      console.log(`⚠️ الزر level-btn-${i} غير موجود في الـ DOM!`);
+      continue;
+    }
+
+    btn.classList.remove('unlocked', 'locked');
+
+    if (i <= highestUnlockedLevel) {
+      // 🔓 المستوى مفتوح وفعال
+      btn.disabled = false;
+      btn.style.opacity = '1';                  
+      btn.style.cursor = 'pointer';
+      btn.classList.add('unlocked');
+
+      if (i === currentLevel) {
+        btn.style.backgroundColor = '#4CAF50'; 
+        btn.style.color = '#ffffff';          
+      } else {
+        btn.style.backgroundColor = '#8BC34A'; 
+        btn.style.color = '#ffffff';
+      }
+
+      if (btn.textContent.includes('🔒')) {
+        btn.textContent = btn.textContent.replace('🔒', '🔓');
+      } else if (!btn.textContent.includes('🔓')) {
+        btn.textContent = '🔓 ' + btn.textContent.replace(/^[🔓🔒]\s*/, '');
+      }
+
+      console.log(`✔️ زر المستوى ${i}: [مفتوح ومفعل] | الأيقونة: 🔓 | الشفافية: 1`);
+
+    } else {
+      // 🔒 المستوى مغلق وغير فعال
+      btn.disabled = true;
+      btn.style.opacity = '0.4';                
+      btn.style.cursor = 'not-allowed';
+      btn.style.backgroundColor = '#e0e0e0';    
+      btn.style.color = '#757575';
+      btn.classList.add('locked');
+
+      if (btn.textContent.includes('🔓')) {
+        btn.textContent = btn.textContent.replace('🔓', '🔒');
+      } else if (!btn.textContent.includes('🔒')) {
+        btn.textContent = '🔒 ' + btn.textContent.replace(/^[🔓🔒]\s*/, '');
+      }
+
+      console.log(`❌ زر المستوى ${i}: [مقفل وخامل] | الأيقونة: 🔒 | الشفافية: 0.4`);
+    }
+  }
+  
+  console.groupEnd();
+}
+
+// دالة شاشة إنهاء المستوى الموحدة والسليمة (بدون عبارة "انتقل للمستوى التالي" في المستوى الثالث)
 function showLevelCompleteScreen() {
   const optionsContainer = document.getElementById('options-container');
   const targetWord = document.getElementById('target-word');
   const instruction = document.getElementById('instruction');
   const feedback = document.getElementById('feedback-msg');
 
-  targetWord.textContent = "🎉 أحسنت!";
-  instruction.textContent = `أتممت المستوى ${currentLevel} بنجاح!`;
-  optionsContainer.innerHTML = '';
-  feedback.textContent = '';
+  if (targetWord) targetWord.textContent = "🎉 أحسنت!";
+  if (instruction) instruction.textContent = `أتممت المستوى ${currentLevel} بنجاح!`;
+  
+  // تخصيص رسالة الـ feedback حسب المستوى (عدم إظهار عبارة الانتقال إذا كان المستوى 3)
+  if (feedback) {
+    if (currentLevel < 3) {
+      feedback.textContent = ''; // تم حذف عبارة انتقل للمستوى التالي
+    } else {
+      feedback.textContent = 'لقد أتممت كافة المستويات بنجاح تام! 🏆';
+    }
+    feedback.className = 'feedback-banner success';
+  }
+  
+  if (optionsContainer) optionsContainer.innerHTML = '';
 
-  // تحديث أعلى مستوى تم الوصول إليه
+  // 🔓 تحديث أعلى مستوى تم الوصول إليه وفتحه تلقائياً
   if (currentLevel >= highestUnlockedLevel && currentLevel < 3) {
     highestUnlockedLevel = currentLevel + 1;
-    updateLevelButtonsUI();
+    updateLevelButtonsUI(); 
   }
 
-  // زر الانتقال للمستوى التالي أو إعادة اللعب
+  // إنشاء زر الانتقال للمستوى التالي أو إعادة اللعب
   const nextBtn = document.createElement('button');
   nextBtn.className = 'level-btn active';
-  nextBtn.style.padding = '12px 24px';
+  nextBtn.style.padding = '15px 30px';
   nextBtn.style.fontSize = '18px';
   nextBtn.style.marginTop = '20px';
+  nextBtn.style.cursor = 'pointer';
+
+    const levelNames = {
+    1: 'الأول',
+    2: 'الثاني',
+    3: 'الثالث'
+  };
 
   if (currentLevel < 3) {
-    nextBtn.textContent = `الانتقال إلى المستوى ${currentLevel + 1} 🚀`;
-    nextBtn.onclick = () => switchLevel(currentLevel + 1);
-  } else {
-    nextBtn.textContent = `أتممت جميع المستويات! إعادة اللعب 🏆`;
-    nextBtn.onclick = () => {
-      highestUnlockedLevel = 1;
-      updateLevelButtonsUI();
-      switchLevel(1);
-    };
-  }
-
-  optionsContainer.appendChild(nextBtn);
+  const nextLevel = currentLevel + 1;
+  const levelLabel = levelNames[nextLevel] || nextLevel;
+  nextBtn.textContent = `الانتقال إلى المستوى ${levelLabel} 🚀`;
+  nextBtn.onclick = () => switchLevel(nextLevel);
+} else {
+  nextBtn.textContent = `🏆 إعادة اللعب من البداية`;
+  nextBtn.onclick = () => {
+    highestUnlockedLevel = 1;
+    updateLevelButtonsUI();
+    switchLevel(1);
+  };
 }
 
-// دالة مساعدة لتعطيل أو تفعيل النقر على الخيارات أثناء الانتقال
-function disableOptions(disabled) {
-  const options = document.querySelectorAll('.option-card');
-  options.forEach(card => {
-    card.style.pointerEvents = disabled ? 'none' : 'auto';
-  });
-}
-
-// شاشة تهنئة عند إنهاء أسئلة المستوى بنجاح
-function showLevelCompleteScreen() {
-  const instruction = document.getElementById('instruction');
-  const targetWord = document.getElementById('target-word');
-  const optionsContainer = document.getElementById('options-container');
-  const feedback = document.getElementById('feedback-msg');
-
-  instruction.textContent = '🎉 تهانينا! أتممت هذا المستوى بجدارة';
-  targetWord.textContent = `المستوى ${currentLevel} مكتمل`;
-  feedback.textContent = 'أنت رائع! استمر إلى المستوى التالي';
-  feedback.className = 'feedback-banner success';
-
-  optionsContainer.innerHTML = '';
-
-  if (currentLevel < 3) {
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'level-btn';
-    nextBtn.style.padding = '15px 30px';
-    nextBtn.style.fontSize = '18px';
-    nextBtn.textContent = 'الانتقال للمستوى التالي ➡️';
-    nextBtn.onclick = () => switchLevel(currentLevel + 1);
+  if (optionsContainer) {
     optionsContainer.appendChild(nextBtn);
-  } else {
-    const finishBtn = document.createElement('button');
-    finishBtn.className = 'level-btn';
-    finishBtn.style.padding = '15px 30px';
-    finishBtn.style.fontSize = '18px';
-    finishBtn.textContent = '🏆 لقد أنهيت جميع المستويات! إعادة اللعبة';
-    finishBtn.onclick = () => switchLevel(1);
-    optionsContainer.appendChild(finishBtn);
   }
 
   if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.5 }
-    });
+    confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
   }
 }
 
-// دالة الانتقال للسؤال التالي بتأثير قلب الصفحة
+// دالة الانتقال للسؤال التالي بتأثير الحركة
 function transitionToNextQuestion() {
   const container = document.getElementById('game-board') || document.getElementById('options-container').parentElement;
+  if (!container) {
+    loadQuestion();
+    return;
+  }
   
-  // 1. تطبيق تأثير خروج الصفحة الحالية
   container.classList.add('page-flip-out');
 
   setTimeout(() => {
-    // 2. تحميل السؤال الجديد في الوظيفة
     loadQuestion();
-
-    // 3. إزالة كلاس الخروج وإضافة كلاس الدخول للصفحة الجديدة
     container.classList.remove('page-flip-out');
     container.classList.add('page-flip-in');
 
-    // إزالة كلاس الدخول بعد انتهاء الحركة ليعود العنصر لحالته الطبيعية
     setTimeout(() => {
       container.classList.remove('page-flip-in');
     }, 600);
-
-  }, 400); // الانتظار حتى ينصف تأثير الخروج
+  }, 400);
 }
 
-// التبديل بين المستويات وتصفير العداد
-function switchLevel(levelNumber) {
-  currentLevel = levelNumber;
-  questionCount = 0; 
-
-  const buttons = document.querySelectorAll('.level-btn');
-  buttons.forEach((btn, idx) => {
-    btn.classList.toggle('active', idx + 1 === levelNumber);
-  });
-
-  loadQuestion();
-}
-
-window.onload = loadQuestion;
+// تشغيل أول سؤال عند تحميل الصفحة وتحديث الأزرار
+window.onload = () => {
+  updateLevelButtonsUI();
+  if (typeof loadQuestion === 'function') {
+    loadQuestion();
+  }
+};

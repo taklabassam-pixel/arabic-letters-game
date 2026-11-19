@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لعبة الحديقة التعليمية - حكايات</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- أيقونة المتصفح المعتادة (Favicon) -->
+  <link rel="icon" type="image/jpeg" href="assets/icons/favicon-512.png">
+
+  <!-- أيقونة أجهزة أبل (Apple Touch Icon) -->
+  <link rel="apple-touch-icon" href="assets/icons/favicon-192.png">
   <!-- مكتبة الكونفيتي للاحتفال -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
@@ -12,8 +17,16 @@
 
   <div class="game-container">
     <header class="game-header">
-      <h2>🌱 حديقة الحروف والكلمات</h2>
-      <div class="score-badge">النقاط: <span id="score">0</span> ⭐️</div>
+      <img src="assets/icons/favicon-512.png"  class="header-logo">
+      <h2>لعبة الحروف والكلمات</h2>
+      <img src="assets/icons/favicon-512.png"  class="header-logo">
+
+      <button id="stars-badge" class="stars-badge stars-hidden" type="button" aria-label="عدد النجوم">
+        <span id="stars-medals" class="stars-medals"></span>
+      </button>
+  </header>
+
+      <div class="score-badge">النقاط: <span id="score">0</span></div>
     </header>
     
     <!-- شريط التنقل بين المستويات الثلاثة (محدث للفتح التدريجي) -->
@@ -51,8 +64,7 @@
   <!-- ملفات التفاعلات الصوتية العامة -->
   <audio id="audio-success" src="../assets/audio/success.wav" preload="auto"></audio>
   <audio id="audio-wrong" src="../assets/audio/wrong.wav" preload="auto"></audio>
-  <audio id="audio-word-player" preload="auto"></audio>
-
+  <audio id="audio-word-player" src="../assets/audio/words/jaras.mp3" preload="auto"></audio>
   <!-- استدعاء ملفات الجافاسكريبت بالترتيب الصحيح -->
   <script src="js/data.js"></script>
   <script src="js/game.js"></script>
