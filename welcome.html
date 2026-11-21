@@ -850,7 +850,11 @@
         }));
       } catch (_) { }
 
-      window.location.href = OWL_GAME_URL;
+      if (window.parent && window.parent !== window) {
+  window.parent.postMessage('owl-welcome-done', '*');
+} else {
+  window.location.href = OWL_GAME_URL;
+}
     }
 
     (function initOwlWelcomeScreen() {
