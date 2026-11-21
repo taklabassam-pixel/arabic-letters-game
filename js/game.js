@@ -21,7 +21,7 @@ const wrongAudio = document.getElementById('audio-wrong');
 const wordAudioPlayer = document.getElementById('audio-word-player');
 
 // إعدادات ومسار ملف صوت النجمة
-const STAR_UNLOCK_AUDIO_PATH = '../assets/audio/win_star.wav';
+const STAR_UNLOCK_AUDIO_PATH = '../assets/audio/win_star.mp3';
 let starAudioPlayer = null;
 let activeTargetAudio = null;
 let starSequenceToken = 0;
@@ -276,7 +276,7 @@ function playCurrentAudio() {
 }
 
 // مدة إضافية بالمللي ثانية لإبقاء جملة التهنئة ظاهرة (مثلاً 1500 = 1.5 ثانية)
-const STAR_CONGRATS_EXTRA_HOLD_MS = 2500;
+const STAR_CONGRATS_EXTRA_HOLD_MS = 2000;
 
 function waitMs(ms) {
   return new Promise(resolve => {
@@ -598,7 +598,7 @@ function checkAnswer(selectedId, clickedCard) {
         } else {
           transitionToNextQuestion();
         }
-      }, 1500);
+      }, 0);
     }
     
   } else {
@@ -901,7 +901,7 @@ function showLevelCompleteScreen() {
     if (currentLevel < 3) {
       feedback.textContent = ''; // تم حذف عبارة انتقل للمستوى التالي
     } else {
-      feedback.textContent = 'لقد أتممت كل المستويات بنجاح ! 🏆';
+      feedback.textContent = 'لقد أتممت كل المستويات بنجاح !';
     }
     feedback.className = 'feedback-banner success';
   }
