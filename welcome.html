@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="assets/icons/logo.png">
+  <title>أهلاً بك - حديقة الحروف الناطقة</title>
+  <style>
+    :root {
+      --owl-bg-dark: #070b19;
+      --owl-card-bg: rgba(25, 16, 56, 0.88);
+      --owl-gold: #fbbf24;
+      --owl-gold-soft: #fef3c7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--owl-bg-dark);
+      color: #ffffff;
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    #owl-welcome-screen {
+      position: relative;
+      min-height: 100dvh;
+      direction: rtl;
+      overflow-x: hidden;
+      background: radial-gradient(circle at 50% 25%, #1e1b4b 0%, #090d1f 70%, #040611 100%);
+    }
+
+    /* طبقة اللوغو في الخلفية */
+    .owl-bg-logo-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .owl-bg-logo-layer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 42%, rgba(9, 13, 31, 0.28) 0%, rgba(6, 10, 24, 0.72) 100%);
+    }
+
+    /* تحريك اللوغو نحو أسفل الشاشة */
+    .owl-bg-logo-img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      object-position: center 78%;
+      opacity: 1;
+      transform: translateY(clamp(28px, 6vh, 72px)) scale(1.02);
+    }
+
+    .owl-bg-logo-fallback {
+      font-size: clamp(2.4rem, 7vw, 4.8rem);
+      font-weight: 900;
+      color: rgba(251, 191, 36, 0.08);
+      user-select: none;
+      letter-spacing: 2px;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    @keyframes owlLogoBreath {
+      0% {
+        transform: scale(0.97) translateY(0px);
+      }
+
+      100% {
+        transform: scale(1.03) translateY(-8px);
+      }
+    }
+
+    /* مؤثرات تزيينية خفيفة ومناسبة للأطفال */
+    .owl-ambient-effects {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .owl-sparkle {
+      position: absolute;
+      color: rgba(251, 191, 36, 0.35);
+      font-size: 18px;
+      animation: owlFloatSparkle 7s ease-in-out infinite;
+    }
+
+    .owl-sparkle:nth-child(1) {
+      top: 14%;
+      right: 10%;
+      animation-delay: 0s;
+      font-size: 20px;
+    }
+
+    .owl-sparkle:nth-child(2) {
+      top: 24%;
+      left: 12%;
+      animation-delay: 1.4s;
+      font-size: 16px;
+    }
+
+    .owl-sparkle:nth-child(3) {
+      bottom: 20%;
+      right: 16%;
+      animation-delay: 2.6s;
+      font-size: 22px;
+    }
+
+    .owl-sparkle:nth-child(4) {
+      bottom: 15%;
+      left: 14%;
+      animation-delay: 3.8s;
+      font-size: 18px;
+    }
+
+    .owl-sparkle:nth-child(5) {
+      top: 52%;
+      right: 6%;
+      animation-delay: 5s;
+      font-size: 15px;
+    }
+
+    @keyframes owlFloatSparkle {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.25;
+      }
+
+      50% {
+        transform: translateY(-12px) rotate(12deg);
+        opacity: 0.65;
+      }
+    }
+
+    /* الشريط العلوي مع توسيط اسم اللعبة */
+    .owl-topbar {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: clamp(10px, 2vw, 14px) clamp(12px, 3vw, 22px);
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(251, 191, 36, 0.18);
+    }
+
+    .owl-brand-btn {
+      grid-column: 2;
+      justify-self: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: none;
+      color: var(--owl-gold);
+      font-size: clamp(16px, 2.5vw, 24px);
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    .owl-reset-btn {
+      grid-column: 3;
+      justify-self: end;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: clamp(12px, 1.8vw, 15px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s ease;
+    }
+
+    /* إخفاء الزر داخل الواجهة الترحيبية الأولى */
+#owl-welcome-screen .owl-reset-btn {
+  display: none;
+}
+
+    .owl-reset-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* جعل كوكو والصبي والبنت في وسط الجزء العلوي من الشاشة */
+    .owl-main-content {
+      position: relative;
+      z-index: 2;
+      min-height: calc(100dvh - 60px);
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: clamp(14px, 3vh, 26px) clamp(14px, 4vw, 28px) clamp(24px, 4vh, 36px);
+      text-align: center;
+    }
+
+    /* إزاحة دائرة كوكو قليلاً بعيداً عن وجه البومة في اللوغو */
+    .owl-avatar-frame {
+      position: relative;
+      width: clamp(112px, 22vw, 175px);
+      height: clamp(112px, 22vw, 175px);
+      border-radius: 50%;
+      border: 3px solid rgba(251, 191, 36, 0.85);
+      background: #3a7829;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 22px rgba(251, 191, 36, 0.22);
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      --owl-shift-x: 0px;
+      --owl-shift-y: clamp(10px, 3vh, 45px);
+      transform: translate(var(--owl-shift-x), var(--owl-shift-y));
+      transition: transform 0.2s ease, box-shadow 0.25s ease;
+    }
+
+    .owl-avatar-frame:hover {
+      transform: translate(var(--owl-shift-x), var(--owl-shift-y)) scale(1.03);
+    }
+
+    @media (min-width: 601px) {
+      .owl-avatar-frame {
+        --owl-shift-x: 0px;
+        --owl-shift-y: clamp(10px, 3vh, 45px);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .owl-avatar-frame {
+        --owl-shift-x: -4px;
+        --owl-shift-y: 20px;
+      }
+    }
+
+    @media (max-height: 540px) and (orientation: landscape) {
+      .owl-avatar-frame {
+        width: 88px;
+        height: 88px;
+        margin-top: 2px;
+        --owl-shift-x: 0px;
+        --owl-shift-y: 12px;
+      }
+
+      .owl-bg-logo-img {
+        object-position: center 90%;
+        transform: translateY(18px) scale(1);
+      }
+    }
+
+    .owl-avatar-frame.is-speaking {
+      box-shadow: 0 10px 34px rgba(251, 191, 36, 0.45), 0 0 0 6px rgba(251, 191, 36, 0.16);
+    }
+
+    .owl-media-item {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+
+    .owl-media-item.is-active {
+      opacity: 1;
+    }
+
+    .owl-emoji-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(48px, 10vw, 72px);
+      background: radial-gradient(circle, #312e81 0%, #1e1b4b 100%);
+    }
+
+    .owl-tap-hint {
+      margin-top: 8px;
+      margin-bottom: 4px;
+      font-size: clamp(11px, 1.6vw, 13px);
+      color: rgba(254, 243, 199, 0.78);
+    }
+
+    /* فقاعة كلام البومة */
+    .owl-speech-bubble {
+      margin-top: 8px;
+      max-width: min(92vw, 560px);
+      width: 100%;
+      padding: clamp(10px, 2vw, 14px) clamp(14px, 3vw, 20px);
+      border-radius: 20px;
+      background: var(--owl-card-bg);
+      border: 1.5px solid rgba(251, 191, 36, 0.45);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      color: var(--owl-gold-soft);
+      font-size: clamp(14px, 2.2vw, 18px);
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    /* حاوية المراحل المساعدة */
+    .owl-stage-area {
+      margin-top: clamp(28px, 6vh, 70px);
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .owl-gender-row {
+      display: flex;
+      gap: clamp(14px, 4vw, 26px);
+      justify-content: center;
+      flex-wrap: nowrap;
+    }
+
+    .owl-gender-card {
+      width: clamp(108px, 30vw, 155px);
+      padding: clamp(10px, 2vw, 14px);
+      border-radius: 22px;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      font-family: Amiri;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+.owl-gender-card:hover {
+  transform: translateY(-3px);
+}
+
+.owl-gender-card.boy {
+  border: 5px solid rgba(96, 165, 250, 0.55);
+  color: #020f1e;
+  overflow: hidden;
+}
+
+.owl-gender-card.girl {
+  border: 5px solid rgba(244, 114, 182, 0.55);
+  color: #5d0734;
+  overflow: hidden;
+}
+
+.owl-gender-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transform: scale(1.2);
+}
+
+.owl-gender-card.boy > :not(img) {
+  margin-top: auto;
+  transform: translateY(10px);
+}
+
+.owl-gender-card.girl > :not(img) {
+  margin-top: auto;
+  transform: translateY(10px);
+}
+
+.owl-letters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: min(86vw, 320px);
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+    .owl-letter-btn {
+      padding: 10px 6px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(15, 23, 42, 0.94);
+      color: #ffffff;
+      font-size: clamp(18px, 3vw, 22px);
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .owl-letter-btn:hover {
+      transform: scale(1.04);
+      background: #1e293b;
+      border-color: var(--owl-gold);
+    }
+
+    .owl-names-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: min(80vw, 270px);
+      max-height: 190px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .owl-name-btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: none;
+      background: #059669;
+      color: #08042f;
+      font-size: clamp(15px, 2.4vw, 18px);
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .owl-name-btn:hover {
+      transform: scale(1.02);
+      background: #047857;
+    }
+
+    .owl-secondary-link {
+      margin-top: 10px;
+      background: transparent;
+      border: none;
+      color: var(--owl-gold);
+      font-size: clamp(13px, 2vw, 15px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .owl-start-game-btn {
+      margin-top: 8px;
+      padding: 13px 26px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      color: #111827;
+      font-size: clamp(15px, 2.4vw, 18px);
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 8px 22px rgba(245, 158, 11, 0.35);
+      transition: transform 0.2s ease;
+    }
+
+    .owl-start-game-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+  </style>
+</head>
+
+<body>
+  <section id="owl-welcome-screen" aria-label="الواجهة الترحيبية">
+    <!-- لوغو اللعبة في الخلفية -->
+    <div class="owl-bg-logo-layer" aria-hidden="true">
+      <img id="owl-bg-logo-img" class="owl-bg-logo-img" src="assets/icons/logo.png" alt=""
+        onload="this.style.display='block'; document.getElementById('owl-bg-logo-fallback').style.display='none';"
+        onerror="this.style.display='none'; document.getElementById('owl-bg-logo-fallback').style.display='block';" />
+      <div id="owl-bg-logo-fallback" class="owl-bg-logo-fallback">حَديقةُ الحروفِ النَّاطقة</div>
+    </div>
+
+    <!-- مؤثرات تزيينية هادئة في الخلفية -->
+    <div class="owl-ambient-effects" aria-hidden="true">
+      <span class="owl-sparkle">✦</span>
+      <span class="owl-sparkle">⭐</span>
+      <span class="owl-sparkle">أ</span>
+      <span class="owl-sparkle">✦</span>
+      <span class="owl-sparkle">ب</span>
+    </div>
+
+    <!-- الشريط العلوي -->
+    <header class="owl-topbar">
+      <button type="button" class="owl-brand-btn" onclick="owlResetToHome()">
+        <span> لُعبةُ الحروف والكلِمات </span>
+      </button>
+      <button type="button" class="owl-reset-btn" onclick="owlResetToHome()">↩️ عودة</button>
+    </header>
+
+    <!-- المحتوى المركزي -->
+    <main class="owl-main-content">
+      <!-- حاوية البومة: تتناوب بين الصورة والفيديو تلقائياً -->
+      <div id="owl-avatar-frame" class="owl-avatar-frame" title="اضغط للاستماع إلى البومة"
+        onclick="owlPlayWelcomeAndListen()">
+        <div id="owl-emoji-fallback" class="owl-emoji-fallback">🦉</div>
+
+        <!-- صورة البومة الثابتة -->
+        <img id="owl-still-image" class="owl-media-item is-active" src="assets/images/owl.png" alt="المعلمة كوكو"
+          onload="document.getElementById('owl-emoji-fallback').style.display='none';"
+          onerror="this.style.display='none';" />
+
+        <!-- فيديو البومة المتحرك أثناء الكلام -->
+        <video id="owl-video-player" class="owl-media-item" src="assets/video/koko_welcome.mp4" playsinline muted loop
+          preload="auto"></video>
+      </div>
+
+      <!-- منطقة الخيارات المساعدة حسب المرحلة -->
+      <div id="owl-stage-area" class="owl-stage-area"></div>
+    </main>
+  </section>
+
+  <script src="js/names-database.js"></script>
+
+  <script>
+    // =========================================================
+    // إعدادات المسارات ومضمون الحوار ورابط صفحة اللعبة
+    // =========================================================
+    const OWL_GAME_URL = 'index.html'; // غيّرها إلى مسار صفحة اللعبة إذا كان مختلفاً
+
+    const OWL_ASSETS = {
+      logoImage: 'assets/icons/logo.png',
+      owlStillImage: 'assets/images/owl.png',
+      owlVideo: 'assets/video/koko_welcome.mp4',
+      boyImage: 'assets/images/he.png',
+      girlImage: 'assets/images/she.png',
+      audioFolder: 'assets/audio/'
+    };
+
+    // عدّل مضمون الحوار هنا بحرية
+    const OWL_DIALOGUE_TEXTS = {
+      askGender: ' أهلاً وسهلاً يا أطفال! أنا المُعلّمة كُوكُو!، إشتقتلكُن! . أُوُلُولي! مين بده يلْعَب لُعْبَة الحُرُوف والكَلِمَات؟. إنتَ؟ أو إنتِ؟',
+      askLetter: ({ shatraText, esmekText }) => `شو أول حرف من ${esmekText} ${shatraText}؟`,
+      askName: ({ chooseActionText, esmekText }) => `ممتاز يللّا! ${chooseActionText} ${esmekText} الحلو`,
+      welcome: ({ childName }) => `أهلاً يا ${childName}! يللّا نلعب سوا لعبة الحروف والكلمات!`,
+      startGameButton: 'الانطلاق إلى لُعْبة الحروف والكلمات 🌸'
+    };
+
+    let owlState = {
+      dialogueState: 'ASK_GENDER',
+      childGender: null,
+      selectedLetter: '',
+      childName: ''
+    };
+
+    const owlSpeechAudio = new Audio();
+    let owlAudioQueueToken = 0;
+
+    function owlNormalizeFirstLetter(nameStr) {
+      const firstChar = (nameStr || '').trim().slice(0, 1);
+      return ['أ', 'إ', 'آ'].includes(firstChar) ? 'أ' : firstChar;
+    }
+
+    function owlGetAvailableLetters() {
+      if (!owlState.childGender) return [];
+      const set = new Set();
+      OWL_KNOWN_NAMES
+        .filter(item => item.gender === owlState.childGender)
+        .forEach(item => {
+          const letter = owlNormalizeFirstLetter(item.name);
+          if (letter) set.add(letter);
+        });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, 'ar'));
+    }
+
+    function owlGetFilteredNames() {
+      if (!owlState.childGender || !owlState.selectedLetter) return [];
+      return OWL_KNOWN_NAMES
+        .filter(item => item.gender === owlState.childGender)
+        .map(item => item.name)
+        .filter(name => owlNormalizeFirstLetter(name) === owlState.selectedLetter);
+    }
+
+    function owlGetSpeechText() {
+      const isGirl = owlState.childGender === 'girl';
+      const context = {
+        isGirl,
+        shatraText: isGirl ? 'يا شاطرة' : 'يا شاطر',
+        esmekText: isGirl ? 'اسمِك' : 'اسمَك',
+        chooseActionText: isGirl ? 'اختاري' : 'اختار',
+        childName: owlState.childName
+      };
+
+      switch (owlState.dialogueState) {
+        case 'ASK_GENDER':
+          return OWL_DIALOGUE_TEXTS.askGender;
+        case 'ASK_LETTER':
+          return OWL_DIALOGUE_TEXTS.askLetter(context);
+        case 'ASK_NAME':
+          return OWL_DIALOGUE_TEXTS.askName(context);
+        case 'WELCOME':
+          return OWL_DIALOGUE_TEXTS.welcome(context);
+        default:
+          return '';
+      }
+    }
+    function owlSetVideoActive(active) {
+      const frame = document.getElementById('owl-avatar-frame');
+      const stillImg = document.getElementById('owl-still-image');
+      const videoEl = document.getElementById('owl-video-player');
+
+      if (active && videoEl && videoEl.src) {
+        videoEl.loop = true;
+        videoEl.muted = true;
+        if (stillImg) stillImg.classList.remove('is-active');
+        videoEl.classList.add('is-active');
+        if (frame) frame.classList.add('is-speaking');
+        if (videoEl.paused) {
+          videoEl.currentTime = 0;
+          videoEl.play().catch(() => {
+            videoEl.classList.remove('is-active');
+            if (stillImg) stillImg.classList.add('is-active');
+          });
+        }
+      } else {
+        if (videoEl) {
+          try { videoEl.pause(); videoEl.currentTime = 0; } catch (_) { }
+          videoEl.classList.remove('is-active');
+        }
+        if (stillImg) stillImg.classList.add('is-active');
+        if (frame) frame.classList.remove('is-speaking');
+      }
+    }
+
+    function owlPlaySingleAudio(src, token) {
+      return new Promise(resolve => {
+        if (!src || token !== owlAudioQueueToken) {
+          resolve();
+          return;
+        }
+
+        owlSpeechAudio.pause();
+        owlSpeechAudio.currentTime = 0;
+        owlSpeechAudio.src = src;
+
+        let finished = false;
+        const done = () => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(safety);
+          owlSpeechAudio.removeEventListener('playing', onPlaying);
+          owlSpeechAudio.removeEventListener('ended', done);
+          owlSpeechAudio.removeEventListener('error', done);
+          if (token === owlAudioQueueToken) {
+            owlSetVideoActive(false);
+          }
+          resolve();
+        };
+
+        const onPlaying = () => {
+          if (!finished && token === owlAudioQueueToken) {
+            owlSetVideoActive(true);
+          }
+        };
+
+        const safety = setTimeout(done, 30000);
+        owlSpeechAudio.addEventListener('playing', onPlaying, { once: true });
+        owlSpeechAudio.addEventListener('ended', done, { once: true });
+        owlSpeechAudio.addEventListener('error', done, { once: true });
+
+        owlSpeechAudio.play().catch(() => done());
+      });
+    }
+
+    async function owlPlayAudioSequenceForState(state) {
+      const token = ++owlAudioQueueToken;
+      owlSetVideoActive(true);
+
+      try {
+        if (state === 'ASK_GENDER') {
+          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}ahlan_wasahlan.mp3`, token);
+        } else if (state === 'ASK_LETTER' && owlState.childGender) {
+          const fileName = owlState.childGender === 'girl' ? 'Shou_ya_shatra.mp3' : 'Shou_ya_shater.mp3';
+          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}${fileName}`, token);
+        } else if (state === 'ASK_NAME' && owlState.childGender) {
+          const fileName = owlState.childGender === 'girl' ? 'Yalla_esmek.mp3' : 'Yalla_esmak.mp3';
+          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}${fileName}`, token);
+        } else if (state === 'WELCOME' && owlState.childName) {
+          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}ahlan_names/اهلاَ_يا_${owlState.childName}.wav`, token);
+          if (token === owlAudioQueueToken) {
+            await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}yalla_nelaab.mp3`, token);
+          }
+        }
+      } finally {
+        if (token === owlAudioQueueToken) {
+          owlSetVideoActive(false);
+        }
+      }
+    }
+
+    function owlRenderStage() {
+      const bubble = document.getElementById('owl-speech-bubble');
+      const stageArea = document.getElementById('owl-stage-area');
+      if (bubble) {
+        bubble.textContent = `"${owlGetSpeechText()}"`;
+      }
+      if (!stageArea) return;
+
+      stageArea.innerHTML = '';
+
+      if (owlState.dialogueState === 'ASK_GENDER') {
+        const row = document.createElement('div');
+        row.className = 'owl-gender-row';
+
+        const boyBtn = document.createElement('button');
+        boyBtn.type = 'button';
+        boyBtn.className = 'owl-gender-card boy';
+        boyBtn.onclick = () => owlHandleSelectGender('boy');
+        boyBtn.innerHTML = `
+          <img src="${OWL_ASSETS.boyImage}" alt="ولد" onerror="this.outerHTML='<span style=\\'font-size:40px\\'>👦</span>'" />
+          <span>أنا</span>
+        `;
+
+        const girlBtn = document.createElement('button');
+        girlBtn.type = 'button';
+        girlBtn.className = 'owl-gender-card girl';
+        girlBtn.onclick = () => owlHandleSelectGender('girl');
+        girlBtn.innerHTML = `
+          <img src="${OWL_ASSETS.girlImage}" alt="بنت" onerror="this.outerHTML='<span style=\\'font-size:40px\\'>👧</span>'" />
+          <span>أنا</span>
+        `;
+
+        row.appendChild(boyBtn);
+        row.appendChild(girlBtn);
+        stageArea.appendChild(row);
+      } else if (owlState.dialogueState === 'ASK_LETTER') {
+        const grid = document.createElement('div');
+        grid.className = 'owl-letters-grid';
+
+        owlGetAvailableLetters().forEach(letter => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'owl-letter-btn';
+          btn.textContent = letter;
+          btn.onclick = () => owlHandleSelectLetter(letter);
+          grid.appendChild(btn);
+        });
+
+        const backBtn = document.createElement('button');
+        backBtn.type = 'button';
+        backBtn.className = 'owl-secondary-link';
+        backBtn.textContent = '↩️ تغيير الاختيار';
+        backBtn.onclick = () => {
+          owlState.dialogueState = 'ASK_GENDER';
+          owlRenderStage();
+        };
+
+        stageArea.appendChild(grid);
+        stageArea.appendChild(backBtn);
+      } else if (owlState.dialogueState === 'ASK_NAME') {
+        const list = document.createElement('div');
+        list.className = 'owl-names-list';
+
+        owlGetFilteredNames().forEach(name => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'owl-name-btn';
+          btn.textContent = name;
+          btn.onclick = () => owlHandleSelectName(name);
+          list.appendChild(btn);
+        });
+
+        const backBtn = document.createElement('button');
+        backBtn.type = 'button';
+        backBtn.className = 'owl-secondary-link';
+        backBtn.textContent = '🔄 تغيير الحرف';
+        backBtn.onclick = () => {
+          owlState.dialogueState = 'ASK_LETTER';
+          owlRenderStage();
+        };
+
+        stageArea.appendChild(list);
+        stageArea.appendChild(backBtn);
+      } else if (owlState.dialogueState === 'WELCOME') {
+        const startBtn = document.createElement('button');
+        startBtn.type = 'button';
+        startBtn.className = 'owl-start-game-btn';
+        startBtn.textContent = OWL_DIALOGUE_TEXTS.startGameButton;
+        startBtn.onclick = owlLaunchGame;
+        stageArea.appendChild(startBtn);
+      }
+    }
+
+    function owlHandleSelectGender(gender) {
+      owlState.childGender = gender;
+      owlState.selectedLetter = '';
+      owlState.dialogueState = 'ASK_LETTER';
+      owlRenderStage();
+      owlPlayAudioSequenceForState('ASK_LETTER');
+    }
+
+    function owlHandleSelectLetter(letter) {
+      owlState.selectedLetter = letter;
+      owlState.dialogueState = 'ASK_NAME';
+      owlRenderStage();
+      owlPlayAudioSequenceForState('ASK_NAME');
+    }
+
+    function owlHandleSelectName(name) {
+      owlState.childName = name;
+      owlState.dialogueState = 'WELCOME';
+      owlRenderStage();
+      owlPlayAudioSequenceForState('WELCOME');
+    }
+
+    function owlPlayWelcomeAndListen() {
+      owlPlayAudioSequenceForState(owlState.dialogueState);
+    }
+
+    function owlResetToHome() {
+      owlAudioQueueToken++;
+      try { owlSpeechAudio.pause(); } catch (_) { }
+      owlSetVideoActive(false);
+
+      owlState.childGender = null;
+      owlState.selectedLetter = '';
+      owlState.childName = '';
+      owlState.dialogueState = 'ASK_GENDER';
+      owlRenderStage();
+    }
+
+    function owlLaunchGame() {
+      owlAudioQueueToken++;
+      try { owlSpeechAudio.pause(); } catch (_) { }
+      owlSetVideoActive(false);
+
+      try {
+        localStorage.setItem('welcomeChildData', JSON.stringify({
+          gender: owlState.childGender,
+          letter: owlState.selectedLetter,
+          name: owlState.childName,
+          completedWelcome: true
+        }));
+      } catch (_) { }
+
+      window.location.href = OWL_GAME_URL;
+    }
+
+    (function initOwlWelcomeScreen() {
+      const logoImg = document.getElementById('owl-bg-logo-img');
+      const stillImg = document.getElementById('owl-still-image');
+      const videoEl = document.getElementById('owl-video-player');
+
+      if (logoImg) logoImg.src = OWL_ASSETS.logoImage;
+      if (stillImg) stillImg.src = OWL_ASSETS.owlStillImage;
+      if (videoEl) {
+        videoEl.src = OWL_ASSETS.owlVideo;
+        videoEl.addEventListener('ended', () => owlSetVideoActive(false));
+        videoEl.addEventListener('error', () => owlSetVideoActive(false));
+      }
+
+      owlRenderStage();
+    })();
+  </script>
+</body>
+
+</html>
