@@ -7,28 +7,45 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- أيقونة المتصفح المعتادة (Favicon) -->
   <link rel="icon" type="image/jpeg" href="assets/icons/favicon-512.png">
-
   <!-- أيقونة أجهزة أبل (Apple Touch Icon) -->
   <link rel="apple-touch-icon" href="assets/icons/favicon-192.png">
   <!-- مكتبة الكونفيتي للاحتفال -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    #owl-welcome-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: #0b1020;
+    }
+    #owl-welcome-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="game-container">
+  <!-- حاوية شاشة الترحيب المرتبطة بملف welcome.html -->
+  <section id="owl-welcome-screen" aria-label="الواجهة الترحيبية">
+    <iframe id="owl-welcome-frame" src="welcome.html" title="واجهة الترحيب"></iframe>
+  </section>
+
+  <div id="game-root" class="game-container">
     <header class="game-header">
-      <img src="assets/icons/favicon-512.png"  class="header-logo">
+      <img src="assets/icons/favicon-512.png" class="header-logo" alt="">
       <h2>لعبة الحروف والكلمات</h2>
-      <img src="assets/icons/favicon-512.png"  class="header-logo">
+      <img src="assets/icons/favicon-512.png" class="header-logo" alt="">
 
       <button id="stars-badge" class="stars-badge stars-hidden" type="button" aria-label="عدد النجوم">
         <span id="stars-medals" class="stars-medals"></span>
       </button>
-  </header>
 
       <div class="score-badge">النقاط: <span id="score">0</span></div>
     </header>
-    
+
     <!-- شريط التنقل بين المستويات الثلاثة (محدث للفتح التدريجي) -->
     <nav class="levels-nav">
       <button id="level-btn-1" class="level-btn active" onclick="switchLevel(1)">المستوى الأوّل</button>
@@ -40,20 +57,20 @@
     <main class="play-area">
       <p id="instruction" class="instruction-text"> اختر الصورة المناسبة للكلمة : </p>
 
-      <!-- حاوية الهدف وزر الصوت (تم إزاحة زر الصوت إلى اليسار بجانب البطاقة) -->
+      <!-- حاوية الهدف وزر الصوت -->
       <div class="target-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 25px;">
         <!-- بطاقة الكلمة أو الحرف المستهدف -->
         <div id="target-card" class="target-card" style="margin: 0;">
           <span id="target-word" class="word-shape">---</span>
         </div>
-        
-        <!-- زر الصوت المستقل والمزاح إلى اليسار -->
+
+        <!-- زر الصوت المستقل -->
         <div id="audio-trigger-btn" class="audio-btn-box" onclick="playCurrentAudio()" title="اضغط للاستماع" style="cursor: pointer; background: #ffffff; padding: 12px 18px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
           <span style="font-size: 32px;">🔊</span>
         </div>
       </div>
 
-      <!-- شبكة الخيارات البصرية (تضمن ظهور الصور الثلاث بانتظام) -->
+      <!-- شبكة الخيارات البصرية -->
       <div id="options-container" class="options-grid"></div>
     </main>
 
@@ -65,8 +82,17 @@
   <audio id="audio-success" src="../assets/audio/success.wav" preload="auto"></audio>
   <audio id="audio-wrong" src="../assets/audio/wrong.wav" preload="auto"></audio>
   <audio id="audio-word-player" src="../assets/audio/words/jaras.mp3" preload="auto"></audio>
+
   <!-- استدعاء ملفات الجافاسكريبت بالترتيب الصحيح -->
   <script src="js/data.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.data === 'owl-welcome-done' || event.data?.type === 'owl-welcome-done') {
+        const welcomeEl = document.getElementById('owl-welcome-screen');
+        if (welcomeEl) welcomeEl.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
