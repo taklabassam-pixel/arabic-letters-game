@@ -12,8 +12,27 @@
   <link rel="apple-touch-icon" href="assets/icons/favicon-192.png">
   <!-- مكتبة الكونفيتي للاحتفال -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    #owl-welcome-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: #0b1020;
+    }
+    #owl-welcome-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- استدعاء واجهة الترحيب من ملف welcome.html -->
+  <section id="owl-welcome-screen" aria-label="الواجهة الترحيبية">
+    <iframe id="owl-welcome-frame" src="welcome.html" title="واجهة الترحيب"></iframe>
+  </section>
 
   <div class="game-container">
     <header class="game-header">
@@ -24,11 +43,10 @@
       <button id="stars-badge" class="stars-badge stars-hidden" type="button" aria-label="عدد النجوم">
         <span id="stars-medals" class="stars-medals"></span>
       </button>
-  </header>
-
-      <div class="score-badge">النقاط: <span id="score">0</span></div>
     </header>
-    
+
+    <div class="score-badge">النقاط: <span id="score">0</span></div>
+
     <!-- شريط التنقل بين المستويات الثلاثة (محدث للفتح التدريجي) -->
     <nav class="levels-nav">
       <button id="level-btn-1" class="level-btn active" onclick="switchLevel(1)">المستوى الأوّل</button>
@@ -46,7 +64,7 @@
         <div id="target-card" class="target-card" style="margin: 0;">
           <span id="target-word" class="word-shape">---</span>
         </div>
-        
+
         <!-- زر الصوت المستقل والمزاح إلى اليسار -->
         <div id="audio-trigger-btn" class="audio-btn-box" onclick="playCurrentAudio()" title="اضغط للاستماع" style="cursor: pointer; background: #ffffff; padding: 12px 18px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
           <span style="font-size: 32px;">🔊</span>
@@ -68,5 +86,18 @@
   <!-- استدعاء ملفات الجافاسكريبت بالترتيب الصحيح -->
   <script src="js/data.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.data === 'owl-welcome-done' || event.data?.type === 'owl-welcome-done') {
+        const welcomeEl = document.getElementById('owl-welcome-screen');
+        if (welcomeEl) welcomeEl.style.display = 'none';
+
+        document.querySelectorAll('audio[preload="none"]').forEach((audioEl) => {
+          audioEl.preload = 'auto';
+          audioEl.load();
+        });
+      }
+    });
+  </script>
 </body>
 </html>
