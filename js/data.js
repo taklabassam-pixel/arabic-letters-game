@@ -6,8 +6,8 @@ const gameData = [
     word: 'أَسَدٌ',
     imagePath: '../../assets/images/asad.webp',
     audioPath: '../assets/audio/words/asad.mp3',
-    letterAudioPath: '../assets/audio/letter_word/alif_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/asad.wav'
+    letterAudioPath: '../assets/audio/letter_word/alif_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/asad.mp3'
   },
   {
     id: 'batta',
@@ -15,8 +15,8 @@ const gameData = [
     word: 'بَطَّةٌ',
     imagePath: '../assets/images/batta.webp',
     audioPath: '../assets/audio/words/batta.mp3',
-    letterAudioPath: '../assets/audio/letter_word/baa_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/batta.wav'
+    letterAudioPath: '../assets/audio/letter_word/baa_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/batta.mp3'
   },
   {
     id: 'jamal',
@@ -24,16 +24,16 @@ const gameData = [
     word: 'جَمَلٌ',
     imagePath: '../assets/images/jamal.webp',
     audioPath: '../assets/audio/words/jamal.mp3',
-    letterAudioPath: '../assets/audio/letter_word/jeem_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/jamal.wav'
+    letterAudioPath: '../assets/audio/letter_word/jeem_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/jamal.mp3'
   },
   { id: 'wurud',
     letter: 'و',
     word: 'وُرُودٌ',
     imagePath: '../assets/images/wurud.webp',
     audioPath: '../assets/audio/words/wurud.mp3',
-    letterAudioPath: '../assets/audio/letter_word/waw_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/wurud.wav'
+    letterAudioPath: '../assets/audio/letter_word/waw_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/wurud.mp3'
   },
   {
     id: 'hisan',
@@ -41,8 +41,8 @@ const gameData = [
     word: 'حِصَانٌ',
     imagePath: '../assets/images/hisan.webp',
     audioPath: '../assets/audio/words/hisan.mp3',
-    letterAudioPath: '../assets/audio/letter_word/haa_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/hisan.wav'
+    letterAudioPath: '../assets/audio/letter_word/haa_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/hisan.mp3'
   },
   {
     id: 'dolfeen',
@@ -50,8 +50,8 @@ const gameData = [
     word: 'دُلفينٌ',
     imagePath: '../assets/images/dolfeen.webp',
     audioPath: '../assets/audio/words/dolfeen.mp3',
-    letterAudioPath: '../assets/audio/letter_word/daal_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/dolfeen.wav'
+    letterAudioPath: '../assets/audio/letter_word/daal_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/dolfeen.mp3'
   },
   {
     id: 'dhib',
@@ -59,8 +59,8 @@ const gameData = [
     word: 'ذِئْبٌ',
     imagePath: '../assets/images/dhib.webp',
     audioPath: '../assets/audio/words/dhib.mp3',
-    letterAudioPath: '../assets/audio/letter_word/dhal_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/dhib.wav'
+    letterAudioPath: '../assets/audio/letter_word/dhal_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/dhib.mp3'
   },
   {
     id: 'zarafa',
@@ -68,8 +68,8 @@ const gameData = [
     word: 'زَرَافَةٌ',
     imagePath: '../assets/images/zarafa.webp',
     audioPath: '../assets/audio/words/zarafa.mp3',
-    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/zarafa.wav'
+    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/zarafa.mp3'
   },
   {
     id: 'samaka',
@@ -77,8 +77,8 @@ const gameData = [
     word: 'سَمَكَةٌ',
     imagePath: '../assets/images/samaka.webp',
     audioPath: '../assets/audio/words/samaka.mp3',
-    letterAudioPath: '../assets/audio/letter_word/seen_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/samaka.wav'
+    letterAudioPath: '../assets/audio/letter_word/seen_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/samaka.mp3'
   },
   {
     id: 'feel',
@@ -86,8 +86,8 @@ const gameData = [
     word: 'فِيلٌ',
     imagePath: '../assets/images/feel.webp',
     audioPath: '../assets/audio/words/feel.mp3',
-    letterAudioPath: '../assets/audio/letter_word/faa_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/feel.wav'
+    letterAudioPath: '../assets/audio/letter_word/faa_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/feel.mp3'
   },
   {
     id: 'qitta',
@@ -95,8 +95,8 @@ const gameData = [
     word: 'قِطَّةٌ',
     imagePath: '../assets/images/qitta.webp',
     audioPath: '../assets/audio/words/qitta.mp3',
-    letterAudioPath: '../assets/audio/letter_word/qaf_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/qitta.wav'
+    letterAudioPath: '../assets/audio/letter_word/qaf_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/qitta.mp3'
   },
 
   // 🍎 الفواكه والطبيعة (10)
@@ -106,8 +106,8 @@ const gameData = [
     word: 'تُفَّاحَةٌ',
     imagePath: '../assets/images/tuffaha.webp',
     audioPath: '../assets/audio/words/tuffaha.mp3',
-    letterAudioPath: '../assets/audio/letter_word/taa_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/tuffaha.wav'
+    letterAudioPath: '../assets/audio/letter_word/taa_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/tuffaha.mp3'
   },
   {
     id: 'mawza',
@@ -115,8 +115,8 @@ const gameData = [
     word: 'مَوْزَةٌ',
     imagePath: '../assets/images/mawza.webp',
     audioPath: '../assets/audio/words/mawza.mp3',
-    letterAudioPath: '../assets/audio/letter_word/meem_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/mawza.wav'
+    letterAudioPath: '../assets/audio/letter_word/meem_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/mawza.mp3'
   },
   {
     id: 'burtuqal',
@@ -124,8 +124,8 @@ const gameData = [
     word: 'بُرْتُقَالٌ',
     imagePath: '../assets/images/burtuqala.webp',
     audioPath: '../assets/audio/words/burtuqala.mp3',
-    letterAudioPath: '../assets/audio/letter_word/baa_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/burtuqal.wav'
+    letterAudioPath: '../assets/audio/letter_word/baa_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/burtuqal.mp3'
   },
   {
     id: 'teen',
@@ -133,8 +133,8 @@ const gameData = [
     word: 'تِينٌ',
     imagePath: '../assets/images/teen.webp',
     audioPath: '../assets/audio/words/teen.mp3',
-    letterAudioPath: '../assets/audio/letter_word/taa_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/teen.wav'
+    letterAudioPath: '../assets/audio/letter_word/taa_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/teen.mp3'
   },
   {
     id: 'thum',
@@ -142,8 +142,8 @@ const gameData = [
     word: 'ثُومٌ',
     imagePath: '../assets/images/thum.webp',
     audioPath: '../assets/audio/words/thum.mp3',
-    letterAudioPath: '../assets/audio/letter_word/thaa_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/thum.wav'
+    letterAudioPath: '../assets/audio/letter_word/thaa_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/thum.mp3'
   },
   {
     id: 'rumman',
@@ -151,8 +151,8 @@ const gameData = [
     word: 'رُمَّانٌ',
     imagePath: '../assets/images/rumman.webp',
     audioPath: '../assets/audio/words/rumman.mp3',
-    letterAudioPath: '../assets/audio/letter_word/raa_damma_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/rumman.wav'
+    letterAudioPath: '../assets/audio/letter_word/raa_damma_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/rumman.mp3'
   },
   {
     id: 'zaytun',
@@ -160,8 +160,8 @@ const gameData = [
     word: 'زَيْتُونٌ',
     imagePath: '../assets/images/zaytun.webp',
     audioPath: '../assets/audio/words/zaytun.mp3',
-    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/zaytun.wav'
+    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/zaytun.mp3'
   },
   {
     id: 'inab',
@@ -169,8 +169,8 @@ const gameData = [
     word: 'عِنَبٌ',
     imagePath: '../assets/images/inab.webp',
     audioPath: '../assets/audio/words/inab.mp3',
-    letterAudioPath: '../assets/audio/letter_word/ain_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/inab.wav'
+    letterAudioPath: '../assets/audio/letter_word/ain_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/inab.mp3'
   },
   {
     id: 'ferjar',
@@ -178,8 +178,8 @@ const gameData = [
     word: 'فِرْجَارٌ',
     imagePath: '../assets/images/ferjar.webp',
     audioPath: '../assets/audio/words/ferjar.mp3',
-    letterAudioPath: '../assets/audio/letter_word/faa_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/ferjar.wav'
+    letterAudioPath: '../assets/audio/letter_word/faa_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/ferjar.mp3'
   },
   {
     id: 'laymun',
@@ -187,8 +187,8 @@ const gameData = [
     word: 'لَيْمُونٌ',
     imagePath: '../assets/images/laymun.webp',
     audioPath: '../assets/audio/words/laymun.mp3',
-    letterAudioPath: '../assets/audio/letter_word/lam_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/laymun.wav'
+    letterAudioPath: '../assets/audio/letter_word/lam_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/laymun.mp3'
   },
 
   // 🧸 الأشياء والأدوات (10)
@@ -198,8 +198,8 @@ const gameData = [
     word: 'إِبْرِيقٌ',
     imagePath: '../assets/images/ibriq.webp',
     audioPath: '../assets/audio/words/ibriq.mp3',
-    letterAudioPath: '../assets/audio/letter_word/alif_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/ibriq.wav'
+    letterAudioPath: '../assets/audio/letter_word/alif_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/ibriq.mp3'
   },
   {
     id: 'bab',
@@ -207,8 +207,8 @@ const gameData = [
     word: 'بَابٌ',
     imagePath: '../assets/images/bab.webp',
     audioPath: '../assets/audio/words/bab.mp3',
-    letterAudioPath: '../assets/audio/letter_word/baa_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/bab.wav'
+    letterAudioPath: '../assets/audio/letter_word/baa_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/bab.mp3'
   },
   {
     id: 'taj',
@@ -216,8 +216,8 @@ const gameData = [
     word: 'تَاجٌ',
     imagePath: '../assets/images/taj.webp',
     audioPath: '../assets/audio/words/taj.mp3',
-    letterAudioPath: '../assets/audio/letter_word/taa_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/taj.wav'
+    letterAudioPath: '../assets/audio/letter_word/taa_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/taj.mp3'
   },
   {
     id: 'jaras',
@@ -225,8 +225,8 @@ const gameData = [
     word: 'جَرَسٌ',
     imagePath: '../assets/images/jaras.webp',
     audioPath: '../assets/audio/words/jaras.mp3',
-    letterAudioPath: '../assets/audio/letter_word/jeem_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/jaras.wav'
+    letterAudioPath: '../assets/audio/letter_word/jeem_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/jaras.mp3'
   },
   {
     id: 'darraja',
@@ -234,8 +234,8 @@ const gameData = [
     word: 'دَرَّاجَةٌ',
     imagePath: '../assets/images/darraja.webp',
     audioPath: '../assets/audio/words/darraja.mp3',
-    letterAudioPath: '../assets/audio/letter_word/daal_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/darraja.wav'
+    letterAudioPath: '../assets/audio/letter_word/daal_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/darraja.mp3'
   },
   {
     id: 'zahra',
@@ -243,8 +243,8 @@ const gameData = [
     word: 'زَهْرَةٌ',
     imagePath: '../assets/images/zahra.webp',
     audioPath: '../assets/audio/words/zahra.mp3',
-    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/zahra.wav'
+    letterAudioPath: '../assets/audio/letter_word/zay_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/zahra.mp3'
   },
   {
     id: 'sayyara',
@@ -252,8 +252,8 @@ const gameData = [
     word: 'سَيَّارَةٌ',
     imagePath: '../assets/images/sayyara.webp',
     audioPath: '../assets/audio/words/sayyara.mp3',
-    letterAudioPath: '../assets/audio/letter_word/seen_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/sayyara.wav'
+    letterAudioPath: '../assets/audio/letter_word/seen_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/sayyara.mp3'
   },
   {
     id: 'qamar',
@@ -261,8 +261,8 @@ const gameData = [
     word: 'قَمَرٌ',
     imagePath: '../assets/images/qamar.webp',
     audioPath: '../assets/audio/words/qamar.mp3',
-    letterAudioPath: '../assets/audio/letter_word/qaf_fatha_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/qamar.wav'
+    letterAudioPath: '../assets/audio/letter_word/qaf_fatha_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/qamar.mp3'
   },
   {
     id: 'kitab',
@@ -270,8 +270,8 @@ const gameData = [
     word: 'كِتَابٌ',
     imagePath: '../assets/images/kitab.webp',
     audioPath: '../assets/audio/words/kitab.mp3',
-    letterAudioPath: '../assets/audio/letter_word/kaf_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/kitab.wav'
+    letterAudioPath: '../assets/audio/letter_word/kaf_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/kitab.mp3'
   },
   {
     id: 'miqass',
@@ -279,16 +279,16 @@ const gameData = [
     word: 'مِقَصٌّ',
     imagePath: '../assets/images/miqass.webp',
     audioPath: '../assets/audio/words/miqass.mp3',
-    letterAudioPath: '../assets/audio/letter_word/meem_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/miqass.wav'
+    letterAudioPath: '../assets/audio/letter_word/meem_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/miqass.mp3'
   },
   {id: 'miftah',
     letter: 'م',
     word: 'مِفْتَاحٌ',
     imagePath: '../assets/images/miftah.webp',
     audioPath: '../assets/audio/words/miftah.mp3',
-    letterAudioPath: '../assets/audio/letter_word/meem_kasra_1.wav',
-    pictureAudioPath: '../assets/audio/letter_word/miftah.wav'}
+    letterAudioPath: '../assets/audio/letter_word/meem_kasra_1.mp3',
+    pictureAudioPath: '../assets/audio/letter_word/miftah.mp3'}
 ];
 
 const educationalItems = gameData;

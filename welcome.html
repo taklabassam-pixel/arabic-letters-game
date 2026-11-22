@@ -693,7 +693,7 @@
           const fileName = owlState.childGender === 'girl' ? 'Yalla_esmek.mp3' : 'Yalla_esmak.mp3';
           await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}${fileName}`, token);
         } else if (state === 'WELCOME' && owlState.childName) {
-          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}ahlan_names/اهلاَ_يا_${owlState.childName}.wav`, token);
+          await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}ahlan_names/اهلاَ_يا_${owlState.childName}.mp3`, token);
           if (token === owlAudioQueueToken) {
             await owlPlaySingleAudio(`${OWL_ASSETS.audioFolder}yalla_nelaab.mp3`, token);
           }
