@@ -21,7 +21,7 @@ const wrongAudio = document.getElementById('audio-wrong');
 const wordAudioPlayer = document.getElementById('audio-word-player');
 
 // إعدادات ومسار ملف صوت النجمة
-const STAR_UNLOCK_AUDIO_PATH = '../assets/audio/win_star.mp3';
+const STAR_UNLOCK_AUDIO_PATH = './assets/audio/win_star.mp3';
 let starAudioPlayer = null;
 let activeTargetAudio = null;
 let starSequenceToken = 0;
